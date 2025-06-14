@@ -1,0 +1,18 @@
+[
+  {
+    "username": "vinko",
+    "password": "testtest",
+    "email": "test@gmail.com",
+    "profile": {
+      "name": "Vinko Mrsic",
+      "bio": "A book lover"
+    },
+    "books": [
+      {
+        "id": "d48pEAAAQBAJ",
+        "progress": "want",
+        "mood": "Crazy, spannend"
+      }
+    ]
+  }
+]

@@ -32,7 +32,6 @@ function setupLibraryTabs() {
         });
     });
 }
-
 // ==============================
 // SEARCH FUNCTION (Google Books API)
 // - Used across pages with <input name="search">
@@ -189,6 +188,51 @@ function restoreBookState() {
 function openBookDetail(bookId) {
     window.location.href = `book.html?id=${bookId}`;
 }
+document.addEventListener("DOMContentLoaded", () => {
+    loadSavedBooks();
+});
+
+// ==============================
+// LOAD SAVED BOOKS
+// ==============================
+document.addEventListener("DOMContentLoaded", loadSavedBooks);
+
+function loadSavedBooks() {
+    const username = localStorage.getItem('username');
+    if (!username) {
+        alert("You must be logged in to view your library.");
+        return;
+    }
+
+    fetch(`/getUserBooks/${username}`)
+        .then(res => res.json())
+        .then(books => {
+            books.forEach(book => {
+                // Build a tile for each saved book
+                const tile = document.createElement('div');
+                tile.className = 'book-tile';
+                tile.setAttribute('onclick', `openBookDetail('${book.id}')`);
+                tile.innerHTML = `
+          <img src="booksymbol.jpg" alt="Book Cover" class="book-cover">
+          <p class="book-title">${book.id}</p>
+        `;
+
+                // Decide where to place it
+                const shelf = book.progress; // 'read', 'want', etc
+                if (shelf === 'read') {
+                    document.getElementById('read-books').appendChild(tile);
+                } else if (shelf === 'want') {
+                    document.getElementById('want-books').appendChild(tile);
+                } else {
+                    document.getElementById('fav-books').appendChild(tile); // or currently reading / favorites
+                }
+            });
+        })
+        .catch(err => {
+            console.error(err);
+        });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     loadSavedBooks();
 });

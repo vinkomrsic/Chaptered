@@ -175,21 +175,34 @@
     }
 
     function saveBookState() {
-        const progress = document.getElementById("progress").value;
-        const mood = document.getElementById("mood").value;
-        const state = { progress, mood };
-        localStorage.setItem(`bookState-${bookId}`, JSON.stringify(state));
-        alert("Saved!");
-    }
+        const username = localStorage.getItem('username'); // Make sure you stored this on login
+        const progress = document.getElementById('progress').value;
+        const mood = document.getElementById('mood').value;
 
-    document.addEventListener("DOMContentLoaded", () => {
-        const saved = localStorage.getItem(`bookState-${bookId}`);
-        if (saved) {
-            const { progress, mood } = JSON.parse(saved);
-            if (progress) document.getElementById("progress").value = progress;
-            if (mood) document.getElementById("mood").value = mood;
-        }
-    });
+        fetch('/saveBook', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                username: username,
+                book: {
+                    id: bookId,
+                    progress: progress,
+                    mood: mood
+                }
+            })
+        })
+            .then(res => res.text())
+            .then(msg => {
+                console.log(msg);
+                alert('Book saved to your profile!');
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Failed to save book!');
+            });
+    }
 </script>
 </body>
 </html>
