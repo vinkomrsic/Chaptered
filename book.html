@@ -147,25 +147,33 @@
     const params = new URLSearchParams(window.location.search);
     const bookId = params.get("id");
 
+    // ✅ These variables store title & thumbnail for later!
+    let savedTitle = "";
+    let savedThumbnail = "";
+
     if (bookId) {
         fetch(`https://www.googleapis.com/books/v1/volumes/${bookId}`)
             .then(res => res.json())
             .then(data => {
                 const info = data.volumeInfo;
 
+                // ✅ Store real title & thumbnail here
+                savedTitle = info.title || "No Title";
+                savedThumbnail = info.imageLinks?.thumbnail || "booksymbol.jpg";
+
                 document.getElementById("book-detail").innerHTML = `
-                        <h2>${info.title}</h2>
-                        <p><strong>Author:</strong> ${info.authors?.join(", ") || "Unknown"}</p>
-                        <p><strong>Published:</strong> ${info.publishedDate || "N/A"}</p>
-                        <p><strong>Description:</strong> ${info.description || "No description available."}</p>
-                        <img src="${info.imageLinks?.thumbnail || 'booksymbol.jpg'}" class="book-cover">
-                    `;
+          <h2>${savedTitle}</h2>
+          <p><strong>Author:</strong> ${info.authors?.join(", ") || "Unknown"}</p>
+          <p><strong>Published:</strong> ${info.publishedDate || "N/A"}</p>
+          <p><strong>Description:</strong> ${info.description || "No description available."}</p>
+          <img src="${savedThumbnail}" class="book-cover">
+        `;
 
                 document.getElementById("extra-info").innerHTML = `
-                        <p><strong>Rating:</strong> ${info.averageRating ?? "Not rated"}</p>
-                        <p><strong>Pages:</strong> ${info.pageCount ?? "Unknown"}</p>
-                        <p><strong>Tags:</strong> ${info.categories?.join(", ") ?? "None"}</p>
-                    `;
+          <p><strong>Rating:</strong> ${info.averageRating ?? "Not rated"}</p>
+          <p><strong>Pages:</strong> ${info.pageCount ?? "Unknown"}</p>
+          <p><strong>Tags:</strong> ${info.categories?.join(", ") ?? "None"}</p>
+        `;
             })
             .catch(() => {
                 document.getElementById("book-detail").innerHTML = "<p>Error loading book details.</p>";
@@ -175,10 +183,11 @@
     }
 
     function saveBookState() {
-        const username = localStorage.getItem('username'); // Make sure you stored this on login
+        const username = localStorage.getItem('username');
         const progress = document.getElementById('progress').value;
         const mood = document.getElementById('mood').value;
 
+        // ✅ USE the savedTitle and savedThumbnail variables — guaranteed correct!
         fetch('/saveBook', {
             method: 'POST',
             headers: {
@@ -188,6 +197,8 @@
                 username: username,
                 book: {
                     id: bookId,
+                    title: savedTitle,
+                    thumbnail: savedThumbnail,
                     progress: progress,
                     mood: mood
                 }

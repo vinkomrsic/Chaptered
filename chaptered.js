@@ -128,43 +128,6 @@ function saveBookState() {
 }
 
 // ==============================
-// BOOK DETAIL PAGE – Load State
-// ==============================
-function loadSavedBooks() {
-    const savedBooks = JSON.parse(localStorage.getItem("savedBooks") || "[]");
-
-    savedBooks.forEach(bookId => {
-        const state = JSON.parse(localStorage.getItem(`bookState-${bookId}`) || "{}");
-        fetch(`https://www.googleapis.com/books/v1/volumes/${bookId}`)
-            .then(res => res.json())
-            .then(data => {
-                const info = data.volumeInfo;
-                const title = info.title || "No Title";
-                const thumbnail = info.imageLinks?.thumbnail || "booksymbol.jpg";
-                const shelf = state.progress || "none"; // read / want / fav etc
-
-                const tile = document.createElement("div");
-                tile.className = "book-tile";
-                tile.setAttribute("onclick", `openBookDetail('${bookId}')`);
-                tile.innerHTML = `
-          <img src="${thumbnail}" alt="Book Cover" class="book-cover">
-          <p class="book-title">${title}</p>
-        `;
-
-                if (shelf === "read") {
-                    document.querySelector("#read-books")?.appendChild(tile);
-                } else if (shelf === "want") {
-                    document.querySelector("#want-books")?.appendChild(tile);
-                } else if (shelf === "favourite" || shelf === "fav") {
-                    document.querySelector("#fav-books")?.appendChild(tile);
-                } else {
-                    document.querySelector("#other-books")?.appendChild(tile);
-                }
-            });
-    });
-}
-
-// ==============================
 // BOOK DETAIL PAGE – Restore State
 // ==============================
 function restoreBookState() {
@@ -188,9 +151,6 @@ function restoreBookState() {
 function openBookDetail(bookId) {
     window.location.href = `book.html?id=${bookId}`;
 }
-document.addEventListener("DOMContentLoaded", () => {
-    loadSavedBooks();
-});
 
 // ==============================
 // LOAD SAVED BOOKS
@@ -208,23 +168,27 @@ function loadSavedBooks() {
         .then(res => res.json())
         .then(books => {
             books.forEach(book => {
-                // Build a tile for each saved book
                 const tile = document.createElement('div');
                 tile.className = 'book-tile';
                 tile.setAttribute('onclick', `openBookDetail('${book.id}')`);
                 tile.innerHTML = `
-          <img src="booksymbol.jpg" alt="Book Cover" class="book-cover">
-          <p class="book-title">${book.id}</p>
+          <img src="${book.thumbnail}" alt="Book Cover" class="book-cover">
+          <p class="book-title">${book.title}</p>
         `;
 
-                // Decide where to place it
-                const shelf = book.progress; // 'read', 'want', etc
+                const shelf = book.progress;
                 if (shelf === 'read') {
                     document.getElementById('read-books').appendChild(tile);
                 } else if (shelf === 'want') {
                     document.getElementById('want-books').appendChild(tile);
+                } else if (shelf === 'favourite' || shelf === 'fav') {
+                    document.getElementById('fav-books').appendChild(tile);
+                } else if (shelf === 'reading') {
+                    // If you have "Currently Reading"
+                    document.querySelector(".book-category .book-row").appendChild(tile);
                 } else {
-                    document.getElementById('fav-books').appendChild(tile); // or currently reading / favorites
+                    // If no valid shelf, maybe add to Favourites
+                    document.getElementById('fav-books').appendChild(tile);
                 }
             });
         })
@@ -233,6 +197,13 @@ function loadSavedBooks() {
         });
 }
 
+// ==============================
+// END OF FILE
+// ==============================
 document.addEventListener("DOMContentLoaded", () => {
+    setupLibraryTabs();
+    setupSearch();
+    restoreBookState();
+    setupShelfToggle();
     loadSavedBooks();
 });
