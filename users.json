@@ -9,11 +9,6 @@
     },
     "books": [
       {
-        "id": "d48pEAAAQBAJ",
-        "progress": "want",
-        "mood": "Crazy, spannend"
-      },
-      {
         "id": "kaHFEAAAQBAJ",
         "title": "Iron Flame – Flammengeküsst",
         "thumbnail": "http://books.google.com/books/publisher/content?id=kaHFEAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&imgtk=AFLRE72fhwACaURebc6c_QG0ljnAcBLfkoZK-BM9hvY-JW_tgOL-ghx-NvERIDHQnMfKYHv6XwS7PngQVnU7uqT0DQ1GM56HqyZc3bZXYz0TLtpxH6Hm2qpSJdWxjyGWKrtorwvHkdWm&source=gbs_api",
@@ -33,6 +28,13 @@
         "thumbnail": "http://books.google.com/books/publisher/content?id=yjmXEAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&imgtk=AFLRE72sg6Hly4INEtqVO5qeGCRGkaDwkCZFQnHWK3UAlq_p07Y652xfxB28kVfLjXlUOuVRLbiaD9sUau8eTkUu8ges-oDnq61brTnuiZD4imMC3_AOnkHqCN7wa15FUX8Z3gLRjok_&source=gbs_api",
         "progress": "reading",
         "mood": "Fun!"
+      },
+      {
+        "id": "d48pEAAAQBAJ",
+        "title": "Batman vs. Lobo",
+        "thumbnail": "http://books.google.com/books/publisher/content?id=d48pEAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&imgtk=AFLRE71IR7peGUIVRh73vrhLsnW1fjIlXpmq7x0uqDbhZISJa6Mv2kAjYByxMjvRhUdmVLAXLbqt7jqS97rtNAEGifr7DX8yB9SrbcKocfvPvfpE9PLvZxHzrM_vmdHanfEEjDbScFL4&source=gbs_api",
+        "progress": "want",
+        "mood": ""
       }
     ]
   }

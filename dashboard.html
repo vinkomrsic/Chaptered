@@ -36,20 +36,8 @@
             <div class="reading-overview">
                 <section class="currently-reading-bubble">
                     <h2>Currently Reading</h2>
-                    <div class="book-row scrollable-row">
-                        <!-- Example books -->
-                        <div class="book-tile" onclick="openBookDetail('BOOK_ID')">
-                            <img src="booksymbol.jpg" alt="Book Cover" class="book-cover">
-                            <p class="book-title">Book Title</p>
-                        </div>
-                        <div class="book-tile" onclick="openBookDetail('BOOK_ID')">
-                            <img src="booksymbol.jpg" alt="Book Cover" class="book-cover">
-                            <p class="book-title">Book Title</p>
-                        </div>
-                        <div class="book-tile" onclick="openBookDetail('BOOK_ID')">
-                            <img src="booksymbol.jpg" alt="Book Cover" class="book-cover">
-                            <p class="book-title">Book Title</p>
-                        </div>
+                    <div class="book-row scrollable-row" id="currently-reading">
+
                     </div>
                 </section>
 
@@ -73,19 +61,7 @@
                 <div class="shelf-content" id="shelf-read">
                     <section class="book-category">
                         <h2>Read</h2>
-                        <div class="book-row scrollable-row">
-                            <div class="book-tile" onclick="openBookDetail('BOOK_ID')">
-                                <img src="booksymbol.jpg" alt="Book Cover" class="book-cover">
-                                <p class="book-title">Book Title</p>
-                            </div>
-                            <div class="book-tile" onclick="openBookDetail('BOOK_ID')">
-                                <img src="booksymbol.jpg" alt="Book Cover" class="book-cover">
-                                <p class="book-title">Book Title</p>
-                            </div>
-                            <div class="book-tile" onclick="openBookDetail('BOOK_ID')">
-                                <img src="booksymbol.jpg" alt="Book Cover" class="book-cover">
-                                <p class="book-title">Book Title</p>
-                            </div>
+                        <div class="book-row scrollable-row" id="dashboard-read">
                         </div>
                     </section>
                 </div>
@@ -93,19 +69,7 @@
                 <div class="shelf-content" id="shelf-want" style="display: none;">
                     <section class="book-category">
                         <h2>Want to Read</h2>
-                        <div class="book-row scrollable-row">
-                            <div class="book-tile" onclick="openBookDetail('BOOK_ID')">
-                                <img src="booksymbol.jpg" alt="Book Cover" class="book-cover">
-                                <p class="book-title">Book Title</p>
-                            </div>
-                            <div class="book-tile" onclick="openBookDetail('BOOK_ID')">
-                                <img src="booksymbol.jpg" alt="Book Cover" class="book-cover">
-                                <p class="book-title">Book Title</p>
-                            </div>
-                            <div class="book-tile" onclick="openBookDetail('BOOK_ID')">
-                                <img src="booksymbol.jpg" alt="Book Cover" class="book-cover">
-                                <p class="book-title">Book Title</p>
-                            </div>
+                        <div class="book-row scrollable-row" id="dashboard-want">
                         </div>
                     </section>
                 </div>
@@ -113,19 +77,7 @@
                 <div class="shelf-content" id="shelf-fav" style="display: none;">
                     <section class="book-category">
                         <h2>Favourites</h2>
-                        <div class="book-row scrollable-row">
-                            <div class="book-tile" onclick="openBookDetail('BOOK_ID')">
-                                <img src="booksymbol.jpg" alt="Book Cover" class="book-cover">
-                                <p class="book-title">Book Title</p>
-                            </div>
-                            <div class="book-tile" onclick="openBookDetail('BOOK_ID')">
-                                <img src="booksymbol.jpg" alt="Book Cover" class="book-cover">
-                                <p class="book-title">Book Title</p>
-                            </div>
-                            <div class="book-tile" onclick="openBookDetail('BOOK_ID')">
-                                <img src="booksymbol.jpg" alt="Book Cover" class="book-cover">
-                                <p class="book-title">Book Title</p>
-                            </div>
+                        <div class="book-row scrollable-row" id="dashboard-fav">
                         </div>
                     </section>
                 </div>

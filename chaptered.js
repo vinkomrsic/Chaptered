@@ -198,6 +198,39 @@ function loadSavedBooks() {
 }
 
 // ==============================
+// LOAD SAVED BOOKS ON DASHBOARD
+// ==============================
+function loadDashboardBooks() {
+    const username = localStorage.getItem('username');
+    if (!username) return;
+
+    fetch(`/getUserBooks/${username}`)
+        .then(res => res.json())
+        .then(books => {
+            books.forEach(book => {
+                const tile = document.createElement('div');
+                tile.className = 'book-tile';
+                tile.setAttribute('onclick', `openBookDetail('${book.id}')`);
+                tile.innerHTML = `
+          <img src="${book.thumbnail}" alt="Book Cover" class="book-cover">
+          <p class="book-title">${book.title}</p>
+        `;
+
+                // Put it in the right section
+                if (book.progress === 'reading') {
+                    document.getElementById('currently-reading').appendChild(tile);
+                } else if (book.progress === 'read') {
+                    document.getElementById('dashboard-read').appendChild(tile);
+                } else if (book.progress === 'want') {
+                    document.getElementById('dashboard-want').appendChild(tile);
+                } else {
+                    document.getElementById('dashboard-fav').appendChild(tile);
+                }
+            });
+        });
+}
+
+// ==============================
 // END OF FILE
 // ==============================
 document.addEventListener("DOMContentLoaded", () => {
@@ -205,5 +238,14 @@ document.addEventListener("DOMContentLoaded", () => {
     setupSearch();
     restoreBookState();
     setupShelfToggle();
-    loadSavedBooks();
+
+    //Detect if we're on dashboard.html
+    if (window.location.pathname.includes('dashboard')) {
+        loadDashboardBooks();
+    }
+
+    //Detect if we're on library.html
+    if (window.location.pathname.includes('library')) {
+        loadSavedBooks();
+    }
 });
