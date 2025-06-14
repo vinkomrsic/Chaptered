@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Login - Chaptered</title>
+    <link rel="stylesheet" href="chaptered.css" />
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f8f6f3;
+            margin: 0;
+            font-family: sans-serif;
+        }
+
+        .login-box {
+            background: #ffffff;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-box h1 {
+            margin-bottom: 1rem;
+            color: #2e3a59;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        .login-box button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #e6a57e;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        .login-box button:hover {
+            background-color: #d8926d;
+        }
+    </style>
+</head>
+<body>
+<div class="login-box">
+    <h1>Welcome to Chaptered</h1>
+    <form action="/login" method="POST">
+        <input type="text" name="username" placeholder="Username" required />
+        <input type="password" name="password" placeholder="Password" required />
+        <button type="submit">Log In</button>
+        <p style="margin-top: 1rem;">
+            Don't have an account? <a href="signup.html">Sign Up</a>
+        </p>
+    </form>
+</div>
+</body>
+</html>

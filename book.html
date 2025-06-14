@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Book Details</title>
+    <link rel="stylesheet" href="chaptered.css">
+    <style>
+        .page-header {
+            padding: 2rem;
+            padding-bottom: 0;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1rem;
+            border-radius: 8px;
+            background-color: #2e3a59;
+            color: #fffaf5;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.95rem;
+            transition: background-color 0.2s;
+        }
+
+        .back-button:hover {
+            background-color: #3b4a65;
+        }
+
+        .back-button::before {
+            content: "\2190";
+            font-size: 1.1rem;
+        }
+
+        .book-detail-container {
+            display: flex;
+            flex-direction: row;
+            gap: 2rem;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            padding: 0 2rem 2rem;
+        }
+
+        .left-column {
+            flex: 1;
+            min-width: 280px;
+        }
+
+        .right-column {
+            flex: 1;
+            min-width: 280px;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .book-info {
+            background-color: #fffaf5;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .book-detail img {
+            width: 140px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-top: 1rem;
+        }
+
+        .book-state {
+            padding: 1.5rem;
+            background-color: #fffaf5;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .book-state label {
+            display: block;
+            margin: 0.75rem 0 0.25rem;
+            font-weight: bold;
+        }
+
+        .book-state input,
+        .book-state select {
+            width: 100%;
+            padding: 0.5rem;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
+            background-color: #fefefe;
+        }
+
+        .book-state button {
+            margin-top: 1rem;
+            background-color: #e6a57e;
+            color: #2e3a59;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .book-state button:hover {
+            background-color: #f3b88f;
+        }
+    </style>
+</head>
+<body>
+<div class="page-header">
+    <a href="library.html" class="back-button">Back to Library</a>
+</div>
+
+<div class="dashboard">
+    <div class="book-detail-container">
+        <div class="left-column">
+            <section class="book-info book-detail" id="book-detail">
+                <h2>Loading book...</h2>
+            </section>
+        </div>
+
+        <div class="right-column">
+            <section class="book-info extra-book-data" id="extra-info"></section>
+
+            <section class="book-state">
+                <label for="progress">Reading Status:</label>
+                <select id="progress">
+                    <option value="none">Select status</option>
+                    <option value="reading">Currently Reading</option>
+                    <option value="read">Finished</option>
+                    <option value="want">Want to Read</option>
+                </select>
+
+                <label for="mood">Mood:</label>
+                <input type="text" id="mood" placeholder="e.g. Inspired, Curious">
+
+                <button onclick="saveBookState()">Save</button>
+            </section>
+        </div>
+    </div>
+</div>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const bookId = params.get("id");
+
+    if (bookId) {
+        fetch(`https://www.googleapis.com/books/v1/volumes/${bookId}`)
+            .then(res => res.json())
+            .then(data => {
+                const info = data.volumeInfo;
+
+                document.getElementById("book-detail").innerHTML = `
+                        <h2>${info.title}</h2>
+                        <p><strong>Author:</strong> ${info.authors?.join(", ") || "Unknown"}</p>
+                        <p><strong>Published:</strong> ${info.publishedDate || "N/A"}</p>
+                        <p><strong>Description:</strong> ${info.description || "No description available."}</p>
+                        <img src="${info.imageLinks?.thumbnail || 'booksymbol.jpg'}" class="book-cover">
+                    `;
+
+                document.getElementById("extra-info").innerHTML = `
+                        <p><strong>Rating:</strong> ${info.averageRating ?? "Not rated"}</p>
+                        <p><strong>Pages:</strong> ${info.pageCount ?? "Unknown"}</p>
+                        <p><strong>Tags:</strong> ${info.categories?.join(", ") ?? "None"}</p>
+                    `;
+            })
+            .catch(() => {
+                document.getElementById("book-detail").innerHTML = "<p>Error loading book details.</p>";
+            });
+    } else {
+        document.getElementById("book-detail").innerHTML = "<p>No book ID provided.</p>";
+    }
+
+    function saveBookState() {
+        const progress = document.getElementById("progress").value;
+        const mood = document.getElementById("mood").value;
+        const state = { progress, mood };
+        localStorage.setItem(`bookState-${bookId}`, JSON.stringify(state));
+        alert("Saved!");
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const saved = localStorage.getItem(`bookState-${bookId}`);
+        if (saved) {
+            const { progress, mood } = JSON.parse(saved);
+            if (progress) document.getElementById("progress").value = progress;
+            if (mood) document.getElementById("mood").value = mood;
+        }
+    });
+</script>
+</body>
+</html>

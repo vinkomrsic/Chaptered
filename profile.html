@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Profile</title>
+  <link rel="stylesheet" href="chaptered.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+<header>
+  <!-- Optional: logo or top nav -->
+</header>
+
+<div class="layout">
+  <nav class="sidebar">
+    <img src="logo.png" alt="logo" width="100px" height="100px" />
+    <h2>Chaptered</h2>
+    <a href="dashboard.html"><i class="fa fa-home"></i> Home</a>
+    <a href="library.html"><i class="fa fa-book"></i> Library</a>
+    <a href="#" class="active"><i class="fa fa-user"></i> Profile</a>
+  </nav>
+
+  <main class="main-content">
+    <div class="dashboard">
+
+      <!-- Profile Overview Row -->
+      <section class="profile-overview">
+        <div class="profile-card">
+          <img src="profilepic.jpg" class="profile-avatar" alt="Profile">
+          <div class="profile-info">
+            <h2>Vinko Mrsic</h2>
+            <p class="profile-bio">Reading to reflect, not just to escape.</p>
+          </div>
+        </div>
+
+        <div class="quick-stats">
+          <div class="quick-stat">
+            <p>📅 Books This Year <span>12</span></p>
+            <p>📚 Favorite Genre <span>Mystery</span></p>
+            <p>💭 Mood Tracker <span>Melancholic → Inspired</span></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Mood Reflection Box -->
+      <section class="reflection-box">
+        <h3>📖 Last Reflection</h3>
+        <p class="reflection-text">"This book really made me question my values. The ending left me completely speechless — I had to sit with it for a while."</p>
+        <div class="mood-meta">
+          <span>📍 Read at: Park Bench</span>
+          <span>🎵 Soundtrack: <a href="#">Lo-Fi Beats</a></span>
+          <span>🧠 Mood: Contemplative</span>
+        </div>
+      </section>
+
+      <!-- Favorite Books -->
+      <section class="book-category">
+        <h2>🌟 Favourite Books</h2>
+        <div class="book-row">
+          <div class="book-tile">
+            <img src="booksymbol.jpg" alt="Book Cover" class="book-cover">
+            <p class="book-title">Book Title</p>
+          </div>
+          <div class="book-tile">
+            <img src="booksymbol.jpg" alt="Book Cover" class="book-cover">
+            <p class="book-title">Book Title</p>
+          </div>
+          <div class="book-tile">
+            <img src="booksymbol.jpg" alt="Book Cover" class="book-cover">
+            <p class="book-title">Book Title</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<footer>
+  <!-- Optional footer content -->
+</footer>
+
+<script src="chaptered.js"></script>
+</body>
+</html>

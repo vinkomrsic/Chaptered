@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Library</title>
+    <link rel="stylesheet" href="chaptered.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+<header>
+    <!-- Section that contains the logo, navigation bar, user avatar -->
+</header>
+
+<div class="layout">
+    <nav class="sidebar">
+        <img src="logo.png" alt="logo" width="100px" height="100px" />
+        <h2>Chaptered</h2>
+        <a href="dashboard.html"><i class="fa fa-home"></i> Home</a>
+        <a href="#" class="active"><i class="fa fa-book"></i> Library</a>
+        <a href="profile.html"><i class="fa fa-user"></i> Profile</a>
+    </nav>
+
+    <main class="main-content">
+        <div class="dashboard">
+            <section class="top-box">
+                <h2>Your Library</h2>
+            </section>
+
+            <section class="book-search">
+                <div class="search-box">
+                    <input type="text" placeholder="Search books" name="search" id="searchInput">
+                    <button type="button" class="search-button" id="searchButton"><i class="fa fa-search"></i></button>
+                </div>
+            </section>
+
+            <!-- Tabs for Filtering -->
+            <div class="tab-bar">
+                <button class="tab active">All</button>
+                <button class="tab">Favourites</button>
+                <button class="tab">Read</button>
+                <button class="tab">Want to Read</button>
+            </div>
+
+            <!-- Dynamic Search Results -->
+            <section class="book-category" id="search-results" style="display:none;">
+                <h2>Search Results</h2>
+                <div class="book-row scrollable-row" id="results-container"></div>
+            </section>
+
+            <!-- Currently Reading -->
+            <section class="book-category">
+                <h2>Currently Reading</h2>
+                <div class="book-row">
+                    <div class="book-tile">
+                        <img src="booksymbol.jpg" alt="Book Cover" class="book-cover">
+                        <p class="book-title">Book Title</p>
+                    </div>
+                    <div class="book-tile">
+                        <img src="booksymbol.jpg" alt="Book Cover" class="book-cover">
+                        <p class="book-title">Book Title</p>
+                    </div>
+                    <div class="book-tile">
+                        <img src="booksymbol.jpg" alt="Book Cover" class="book-cover">
+                        <p class="book-title">Book Title</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="book-category">
+                <h2>Read</h2>
+                <div class="book-row" id="read-books"></div>
+            </section>
+
+            <section class="book-category">
+                <h2>Favourites</h2>
+                <div class="book-row" id="fav-books"></div>
+            </section>
+
+            <section class="book-category">
+                <h2>Want to Read</h2>
+                <div class="book-row" id="want-books"></div>
+            </section>
+        </div>
+    </main>
+</div>
+
+<footer>
+    <!-- Copyright or helpful links -->
+</footer>
+
+<script src="chaptered.js"></script>
+</body>
+</html>

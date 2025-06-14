@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Home</title>
+    <link rel="stylesheet" href="chaptered.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+</head>
+<body>
+<header>
+    <!-- Section that contains the logo, navigation bar, user avatar -->
+</header>
+
+<div class="layout">
+    <nav class="sidebar">
+        <img src="logo.png" alt="logo" width="100px" height="100px" />
+        <h2>Chaptered</h2>
+        <a href="#" class="active"><i class="fa fa-home"></i> Home</a>
+        <a href="library.html"><i class="fa fa-book"></i> Library</a>
+        <a href="profile.html"><i class="fa fa-user"></i> Profile</a>
+    </nav>
+
+    <main class="main-content">
+        <div class="dashboard">
+            <section class="top-box">
+                <h2>Welcome Back!</h2>
+            </section>
+
+            <section class="book-search">
+                <div class="search-box">
+                    <input type="text" placeholder="Search books" name="search" id="dashboard-search" />
+                    <button type="button" class="search-button"><i class="fa fa-search"></i></button>
+                </div>
+            </section>
+
+            <div class="reading-overview">
+                <section class="currently-reading-bubble">
+                    <h2>Currently Reading</h2>
+                    <div class="book-row scrollable-row">
+                        <!-- Example books -->
+                        <div class="book-tile" onclick="openBookDetail('BOOK_ID')">
+                            <img src="booksymbol.jpg" alt="Book Cover" class="book-cover">
+                            <p class="book-title">Book Title</p>
+                        </div>
+                        <div class="book-tile" onclick="openBookDetail('BOOK_ID')">
+                            <img src="booksymbol.jpg" alt="Book Cover" class="book-cover">
+                            <p class="book-title">Book Title</p>
+                        </div>
+                        <div class="book-tile" onclick="openBookDetail('BOOK_ID')">
+                            <img src="booksymbol.jpg" alt="Book Cover" class="book-cover">
+                            <p class="book-title">Book Title</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="quick-stats">
+                    <div class="quick-stat">
+                        <p>Books This Year <span>7</span></p>
+                        <p>Favorite Genre <span>Mystery</span></p>
+                        <p>Mood <span>😊</span></p>
+                    </div>
+                </section>
+            </div>
+
+            <section class="book-shelves">
+                <div id="shelves">
+                    <button type="button" class="shelf-button active" data-target="read">Read</button>
+                    <button type="button" class="shelf-button" data-target="want">Want to Read</button>
+                    <button type="button" class="shelf-button" data-target="fav">Favourites</button>
+                </div>
+                <hr id="book-shelves-hr" />
+
+                <div class="shelf-content" id="shelf-read">
+                    <section class="book-category">
+                        <h2>Read</h2>
+                        <div class="book-row scrollable-row">
+                            <div class="book-tile" onclick="openBookDetail('BOOK_ID')">
+                                <img src="booksymbol.jpg" alt="Book Cover" class="book-cover">
+                                <p class="book-title">Book Title</p>
+                            </div>
+                            <div class="book-tile" onclick="openBookDetail('BOOK_ID')">
+                                <img src="booksymbol.jpg" alt="Book Cover" class="book-cover">
+                                <p class="book-title">Book Title</p>
+                            </div>
+                            <div class="book-tile" onclick="openBookDetail('BOOK_ID')">
+                                <img src="booksymbol.jpg" alt="Book Cover" class="book-cover">
+                                <p class="book-title">Book Title</p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="shelf-content" id="shelf-want" style="display: none;">
+                    <section class="book-category">
+                        <h2>Want to Read</h2>
+                        <div class="book-row scrollable-row">
+                            <div class="book-tile" onclick="openBookDetail('BOOK_ID')">
+                                <img src="booksymbol.jpg" alt="Book Cover" class="book-cover">
+                                <p class="book-title">Book Title</p>
+                            </div>
+                            <div class="book-tile" onclick="openBookDetail('BOOK_ID')">
+                                <img src="booksymbol.jpg" alt="Book Cover" class="book-cover">
+                                <p class="book-title">Book Title</p>
+                            </div>
+                            <div class="book-tile" onclick="openBookDetail('BOOK_ID')">
+                                <img src="booksymbol.jpg" alt="Book Cover" class="book-cover">
+                                <p class="book-title">Book Title</p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="shelf-content" id="shelf-fav" style="display: none;">
+                    <section class="book-category">
+                        <h2>Favourites</h2>
+                        <div class="book-row scrollable-row">
+                            <div class="book-tile" onclick="openBookDetail('BOOK_ID')">
+                                <img src="booksymbol.jpg" alt="Book Cover" class="book-cover">
+                                <p class="book-title">Book Title</p>
+                            </div>
+                            <div class="book-tile" onclick="openBookDetail('BOOK_ID')">
+                                <img src="booksymbol.jpg" alt="Book Cover" class="book-cover">
+                                <p class="book-title">Book Title</p>
+                            </div>
+                            <div class="book-tile" onclick="openBookDetail('BOOK_ID')">
+                                <img src="booksymbol.jpg" alt="Book Cover" class="book-cover">
+                                <p class="book-title">Book Title</p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </section>
+        </div>
+    </main>
+</div>
+
+<footer>
+    <!-- Copyright or helpful links -->
+</footer>
+
+<script src="chaptered.js"></script>
+</body>
+</html>
