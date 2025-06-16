@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <title>Book Details</title>
     <!-- ================================
-         - Main CSS and inline page styling
-    =================================== -->
+       - Main CSS and FontAwesome icons
+  =================================== -->
     <link rel="stylesheet" href="chaptered.css">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
         /* Back button + page layout for book detail */
         .page-header {
@@ -158,6 +158,9 @@
                 <input type="text" id="mood" placeholder="e.g. Inspired, Curious">
 
                 <button onclick="saveBookState()">Save</button>
+                <button id="favButton" onclick="toggleFavourite()">
+                    <i id="favIcon" class="fa fa-star-o"></i> Favourite
+                </button>
             </section>
 
         </div>
@@ -171,9 +174,10 @@
     const params = new URLSearchParams(window.location.search);
     const bookId = params.get("id");
 
-    // Store title + thumbnail for saving
+    // Store title & thumbnail for server save
     let savedTitle = "";
     let savedThumbnail = "";
+    let currentFavourite = false; // ⭐️ Track current favourite status
 
     if (bookId) {
         fetch(`https://www.googleapis.com/books/v1/volumes/${bookId}`)
@@ -185,18 +189,21 @@
                 savedThumbnail = info.imageLinks?.thumbnail || "booksymbol.jpg";
 
                 document.getElementById("book-detail").innerHTML = `
-            <h2>${savedTitle}</h2>
-            <p><strong>Author:</strong> ${info.authors?.join(", ") || "Unknown"}</p>
-            <p><strong>Published:</strong> ${info.publishedDate || "N/A"}</p>
-            <p><strong>Description:</strong> ${info.description || "No description available."}</p>
-            <img src="${savedThumbnail}" class="book-cover">
-          `;
+                    <h2>${savedTitle}</h2>
+                    <p><strong>Author:</strong> ${info.authors?.join(", ") || "Unknown"}</p>
+                    <p><strong>Published:</strong> ${info.publishedDate || "N/A"}</p>
+                    <p><strong>Description:</strong> ${info.description || "No description available."}</p>
+                    <img src="${savedThumbnail}" class="book-cover">
+                `;
 
                 document.getElementById("extra-info").innerHTML = `
-            <p><strong>Rating:</strong> ${info.averageRating ?? "Not rated"}</p>
-            <p><strong>Pages:</strong> ${info.pageCount ?? "Unknown"}</p>
-            <p><strong>Tags:</strong> ${info.categories?.join(", ") ?? "None"}</p>
-          `;
+                    <p><strong>Rating:</strong> ${info.averageRating ?? "Not rated"}</p>
+                    <p><strong>Pages:</strong> ${info.pageCount ?? "Unknown"}</p>
+                    <p><strong>Tags:</strong> ${info.categories?.join(", ") ?? "None"}</p>
+                `;
+
+                // Also load current saved favourite (if exists)
+                restoreBookState();
             })
             .catch(() => {
                 document.getElementById("book-detail").innerHTML = "<p>Error loading book details.</p>";
@@ -205,37 +212,74 @@
         document.getElementById("book-detail").innerHTML = "<p>No book ID provided.</p>";
     }
 
-    // Save reading status and mood for the book
+    // SAVE BOOK: progress, mood, favourite
     function saveBookState() {
-        const username = localStorage.getItem('username');
-        const progress = document.getElementById('progress').value;
-        const mood = document.getElementById('mood').value;
+        const bookId = new URLSearchParams(window.location.search).get("id");
+        if (!bookId) return;
 
+        const progressInput = document.getElementById("progress");
+        const moodInput = document.getElementById("mood");
+        if (!progressInput || !moodInput) return;
+
+        // Save to localStorage (optional)
+        const state = {
+            progress: progressInput.value,
+            mood: moodInput.value,
+            favourite: currentFavourite
+        };
+        localStorage.setItem(`bookState-${bookId}`, JSON.stringify(state));
+
+        // Also save server-side
+        const username = localStorage.getItem('username');
         fetch('/saveBook', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 username: username,
                 book: {
                     id: bookId,
                     title: savedTitle,
                     thumbnail: savedThumbnail,
-                    progress: progress,
-                    mood: mood
+                    progress: progressInput.value,
+                    mood: moodInput.value,
+                    favourite: currentFavourite
                 }
             })
         })
-            .then(res => res.text())
-            .then(msg => {
-                console.log(msg);
-                alert('Book saved to your profile!');
+            .then(() => {
+                console.log("Book saved to server.");
             })
-            .catch(err => {
-                console.error(err);
-                alert('Failed to save book!');
-            });
+            .catch(err => console.error(err));
+
+        alert("Book saved to your library!");
+    }
+
+    // FAVOURITE BUTTON: toggle state + icon + server update
+    function toggleFavourite() {
+        currentFavourite = !currentFavourite;
+        const icon = document.getElementById('favIcon');
+        icon.className = currentFavourite ? 'fa fa-star' : 'fa fa-star-o';
+
+        // Save immediately when toggled
+        saveBookState();
+    }
+
+    // RESTORE BOOK STATE (progress, mood, favourite)
+    function restoreBookState() {
+        const bookId = new URLSearchParams(window.location.search).get("id");
+        if (!bookId) return;
+
+        const saved = localStorage.getItem(`bookState-${bookId}`);
+        if (saved) {
+            const { progress, mood, favourite } = JSON.parse(saved);
+            document.getElementById("progress").value = progress || "none";
+            document.getElementById("mood").value = mood || "";
+            currentFavourite = favourite || false;
+
+            // Update star icon
+            const icon = document.getElementById('favIcon');
+            icon.className = currentFavourite ? 'fa fa-star' : 'fa fa-star-o';
+        }
     }
 </script>
 

@@ -12,7 +12,6 @@ const port = 3000;
 // Location of the local JSON "database"
 const USERS_FILE = path.join(__dirname, 'users.json');
 
-
 // Serve static HTML, CSS, JS files
 app.use(express.static(__dirname));
 
@@ -24,9 +23,8 @@ app.use(bodyParser.json());
 // HELPER FUNCTIONS
 // ================================
 
-// Load users from JSON file
+// Load users from JSON file (create empty if not exists)
 function loadUsers() {
-    // If file doesn't exist, create empty array
     if (!fs.existsSync(USERS_FILE)) {
         fs.writeFileSync(USERS_FILE, '[]');
     }
@@ -45,21 +43,17 @@ function saveUsers(users) {
 
 // ----------
 // SIGNUP ROUTE
-// - Accepts POST form data for signup
-// - Adds new user with profile & empty book list
+// - Adds new user with profile & empty books array
 // ----------
-
 app.post('/signup', (req, res) => {
     const { username, password, email, name, bio } = req.body;
 
     let users = loadUsers();
 
-    // Prevent duplicate usernames
     if (users.some(u => u.username === username)) {
         return res.send('Username already taken.');
     }
 
-    // Create user object with nested profile
     const newUser = {
         username,
         password,
@@ -68,7 +62,7 @@ app.post('/signup', (req, res) => {
             name: name || '',
             bio: bio || ''
         },
-        books: [] // empty at first
+        books: []
     };
 
     users.push(newUser);
@@ -80,10 +74,8 @@ app.post('/signup', (req, res) => {
 
 // ----------
 // LOGIN ROUTE
-// - Checks submitted username & password
-// - Redirects to profile on success
+// - Verifies username & password
 // ----------
-
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
 
@@ -100,19 +92,26 @@ app.post('/login', (req, res) => {
 
 // ----------
 // SAVE BOOK ROUTE
-// - Accepts JSON with username and book object
-// - Adds the book to the user's books array
+// - Finds existing book by ID and updates its data
+// - If not exists, pushes new
 // ----------
-
 app.post('/saveBook', (req, res) => {
     const { username, book } = req.body;
     let users = loadUsers();
 
     const user = users.find(u => u.username === username);
     if (user) {
-        user.books.push(book);
+        // Try to find existing book by ID
+        const existing = user.books.find(b => b.id === book.id);
+        if (existing) {
+            // Update all fields
+            Object.assign(existing, book);
+        } else {
+            user.books.push(book);
+        }
+
         saveUsers(users);
-        res.send('Book saved!');
+        res.send('Book saved (updated if existed)!');
     } else {
         res.send('User not found.');
     }
@@ -120,9 +119,7 @@ app.post('/saveBook', (req, res) => {
 
 // ----------
 // GET USER'S SAVED BOOKS
-// - Returns JSON array of books for given username
 // ----------
-
 app.get('/getUserBooks/:username', (req, res) => {
     const username = req.params.username;
     const users = loadUsers();
@@ -136,9 +133,7 @@ app.get('/getUserBooks/:username', (req, res) => {
 
 // ----------
 // GET USER PROFILE INFO
-// - Returns profile fields + books for given username
 // ----------
-
 app.get('/getProfile/:username', (req, res) => {
     const username = req.params.username;
     const users = loadUsers();
@@ -156,7 +151,6 @@ app.get('/getProfile/:username', (req, res) => {
 // ================================
 // START SERVER
 // ================================
-
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
