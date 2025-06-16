@@ -13,8 +13,8 @@ body {
 
 .layout {
     display: flex;
-    min-height: 100vh;
     padding: 1rem;
+    min-height: 100vh;
 }
 
 /* ---------------------------------------------------
@@ -24,11 +24,12 @@ body {
     background-color: #252f39;
     color: #ffffff;
     width: 170px;
-    padding: 1.5rem;
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
     border-radius: 12px 0 0 12px;
     box-sizing: border-box;
+    padding: 1rem;
 }
 
 .sidebar a {
@@ -63,10 +64,13 @@ body {
 --------------------------------------------------- */
 .main-content {
     flex: 1;
+    display: flex;
+    flex-direction: column;
     box-sizing: border-box;
 }
 
 .dashboard {
+    flex: 1;          
     background-color: #fae6cd;
     border-radius: 0 12px 12px 0;
     padding: 2rem;

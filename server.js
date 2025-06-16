@@ -110,3 +110,19 @@ app.get('/users', (req, res) => {
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
+
+// Profile data
+app.get('/getProfile/:username', (req, res) => {
+    const username = req.params.username;
+    const users = loadUsers();
+    const user = users.find(u => u.username === username);
+    if (user) {
+        // Return profile + books
+        res.json({
+            profile: user.profile,
+            books: user.books
+        });
+    } else {
+        res.status(404).json({ error: 'User not found' });
+    }
+});

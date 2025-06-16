@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
 function setupLibraryTabs() {
     const tabButtons = document.querySelectorAll(".tab");
     const categories = document.querySelectorAll(".book-category");
+    const searchSection = document.getElementById("search-results");
 
     if (!tabButtons.length || !categories.length) return;
 
@@ -25,8 +26,12 @@ function setupLibraryTabs() {
             const filter = button.textContent.trim().toLowerCase();
 
             categories.forEach((section) => {
-                const heading = section.querySelector("h2").textContent.toLowerCase();
-                const matches = filter === "all" || heading.includes(filter);
+                if (section.id === "search-results") return;
+
+                const heading = section.querySelector("h2").textContent.trim().toLowerCase();
+
+                // ✅ Use exact match
+                const matches = filter === "all" || heading === filter;
                 section.style.display = matches ? "block" : "none";
             });
         });
@@ -41,19 +46,31 @@ function setupSearch() {
     const searchInput = document.querySelector("input[name='search']");
     const searchResultsWrapper =
         document.getElementById("results-container") ||
-        document.querySelector(".book-row");
+        document.getElementById("currently-reading");
+
+    // Library: may have #search-results section
+    const searchSection = document.getElementById("search-results");
 
     if (!searchInput || !searchResultsWrapper) return;
 
     searchInput.addEventListener("input", function () {
         const query = this.value.trim();
-        if (!query) return;
+
+        if (!query) {
+            searchResultsWrapper.innerHTML = "";
+            if (searchSection) searchSection.style.display = "none";
+            return;
+        }
 
         fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`)
             .then((res) => res.json())
             .then((data) => {
                 const books = data.items?.slice(0, 8) || [];
                 searchResultsWrapper.innerHTML = "";
+
+                if (searchSection) {
+                    searchSection.style.display = books.length ? "block" : "none";
+                }
 
                 books.forEach((item) => {
                     const info = item.volumeInfo;
@@ -155,14 +172,17 @@ function openBookDetail(bookId) {
 // ==============================
 // LOAD SAVED BOOKS
 // ==============================
-document.addEventListener("DOMContentLoaded", loadSavedBooks);
-
 function loadSavedBooks() {
     const username = localStorage.getItem('username');
     if (!username) {
         alert("You must be logged in to view your library.");
         return;
     }
+
+    document.getElementById('reading-books').innerHTML = '';
+    document.getElementById('read-books').innerHTML = '';
+    document.getElementById('want-books').innerHTML = '';
+    document.getElementById('fav-books').innerHTML = '';
 
     fetch(`/getUserBooks/${username}`)
         .then(res => res.json())
@@ -172,22 +192,22 @@ function loadSavedBooks() {
                 tile.className = 'book-tile';
                 tile.setAttribute('onclick', `openBookDetail('${book.id}')`);
                 tile.innerHTML = `
-          <img src="${book.thumbnail}" alt="Book Cover" class="book-cover">
-          <p class="book-title">${book.title}</p>
-        `;
+                    <img src="${book.thumbnail}" alt="Book Cover" class="book-cover">
+                    <p class="book-title">${book.title}</p>
+                `;
 
                 const shelf = book.progress;
-                if (shelf === 'read') {
+
+                if (shelf === 'reading') {
+                    document.getElementById('reading-books').appendChild(tile);
+                } else if (shelf === 'read') {
                     document.getElementById('read-books').appendChild(tile);
                 } else if (shelf === 'want') {
                     document.getElementById('want-books').appendChild(tile);
                 } else if (shelf === 'favourite' || shelf === 'fav') {
                     document.getElementById('fav-books').appendChild(tile);
-                } else if (shelf === 'reading') {
-                    // If you have "Currently Reading"
-                    document.querySelector(".book-category .book-row").appendChild(tile);
                 } else {
-                    // If no valid shelf, maybe add to Favourites
+                    // If no valid shelf, fallback to Favourites
                     document.getElementById('fav-books').appendChild(tile);
                 }
             });
@@ -231,6 +251,53 @@ function loadDashboardBooks() {
 }
 
 // ==============================
+// FUNCTION TO LOAD PROFILE
+// ==============================
+function loadProfile() {
+    const username = localStorage.getItem('username');
+    if (!username) return;
+
+    fetch(`/getProfile/${username}`)
+        .then(res => res.json())
+        .then(data => {
+            const profile = data.profile;
+            const books = data.books;
+
+            // ✅ Update name & bio
+            document.querySelector('.profile-info h2').textContent = profile.name;
+            document.querySelector('.profile-bio').textContent = profile.bio;
+
+            // ✅ Update quick stats
+            const booksThisYear = books.filter(b => b.progress === 'read').length;
+            const favouriteGenre = "Mystery"; // placeholder — could compute later
+            const moodTracker = "Dynamic Mood"; // placeholder
+
+            document.querySelector('.quick-stat').innerHTML = `
+        <p>📅 Books This Year <span>${booksThisYear}</span></p>
+        <p>📚 Favorite Genre <span>${favouriteGenre}</span></p>
+        <p>💭 Mood Tracker <span>${moodTracker}</span></p>
+      `;
+
+            // ✅ Populate favourite books
+            const favBooks = books.filter(b => b.progress === 'favourite' || b.progress === 'fav');
+            const favContainer = document.querySelector('.book-category .book-row');
+            favContainer.innerHTML = ''; // Clear placeholders
+
+            favBooks.forEach(book => {
+                const tile = document.createElement('div');
+                tile.className = 'book-tile';
+                tile.setAttribute('onclick', `openBookDetail('${book.id}')`);
+                tile.innerHTML = `
+          <img src="${book.thumbnail}" alt="Book Cover" class="book-cover">
+          <p class="book-title">${book.title}</p>
+        `;
+                favContainer.appendChild(tile);
+            });
+        })
+        .catch(err => console.error(err));
+}
+
+// ==============================
 // END OF FILE
 // ==============================
 document.addEventListener("DOMContentLoaded", () => {
@@ -247,5 +314,10 @@ document.addEventListener("DOMContentLoaded", () => {
     //Detect if we're on library.html
     if (window.location.pathname.includes('library')) {
         loadSavedBooks();
+    }
+
+    //Detect if we're on profile.html
+    if (window.location.pathname.includes('profile')) {
+        loadProfile();
     }
 });
