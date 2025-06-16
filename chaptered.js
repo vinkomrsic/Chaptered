@@ -323,6 +323,16 @@ function loadDashboardBooks() {
                     <p class="book-title">${book.title}</p>
                 `;
 
+                const booksThisYear = books.filter(b => b.progress === 'read').length;
+                const favouriteGenre = "Mystery"; // Placeholder
+                const moodTracker = "Dynamic Mood"; // Placeholder
+
+                document.querySelector('.quick-stat').innerHTML = `
+                    <p><i class="fa fa-calendar"></i> Books This Year <span>${booksThisYear}</span></p>
+                    <p><i class="fa fa-book"></i> Favorite Genre <span>${favouriteGenre}</span></p>
+                    <p><i class="fa fa-comment"></i> Mood Tracker <span>${moodTracker}</span></p>
+                `;
+
                 if (book.progress === 'reading') {
                     document.getElementById('currently-reading').appendChild(tile);
                 } else if (book.progress === 'read') {
@@ -361,9 +371,9 @@ function loadProfile() {
             const moodTracker = "Dynamic Mood"; // Placeholder
 
             document.querySelector('.quick-stat').innerHTML = `
-                <p>📅 Books This Year <span>${booksThisYear}</span></p>
-                <p>📚 Favorite Genre <span>${favouriteGenre}</span></p>
-                <p>💭 Mood Tracker <span>${moodTracker}</span></p>
+                <p><i class="fa fa-calendar"></i> Books This Year <span>${booksThisYear}</span></p>
+                <p><i class="fa fa-book"></i> Favorite Genre <span>${favouriteGenre}</span></p>
+                <p><i class="fa fa-comment"></i> Mood Tracker <span>${moodTracker}</span></p>
             `;
 
             const favBooks = books.filter(b => b.favourite === true);
