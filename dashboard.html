@@ -3,15 +3,24 @@
 <head>
     <meta charset="UTF-8" />
     <title>Home</title>
+    <!-- ================================
+         - Main CSS and FontAwesome icons
+    =================================== -->
     <link rel="stylesheet" href="chaptered.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
 </head>
-<body>
-<header>
-    <!-- Section that contains the logo, navigation bar, user avatar -->
-</header>
 
+<body>
+<header> </header>
+<!-- ================================
+     - Sidebar + Main content area
+=================================== -->
 <div class="layout">
+
+    <!-- ================================
+         SIDEBAR NAVIGATION
+         - Logo, title, page links
+    =================================== -->
     <nav class="sidebar">
         <div class="sidebar-header">
             <img src="logo.png" alt="logo" width="100px" height="100px" />
@@ -23,27 +32,46 @@
         <a href="profile.html"><i class="fa fa-user"></i> Profile</a>
     </nav>
 
+    <!-- ================================
+         MAIN PAGE CONTENT
+    =================================== -->
     <main class="main-content">
         <div class="dashboard">
+
+            <!-- ================================
+                 TOP GREETING BOX
+            =================================== -->
             <section class="top-box">
                 <h2>Welcome Back!</h2>
             </section>
 
+            <!-- ================================
+                 SEARCH BAR
+                 - Search books (Google Books API)
+            =================================== -->
             <section class="book-search">
                 <div class="search-box">
                     <input type="text" placeholder="Search books" name="search" id="dashboard-search" />
-                    <button type="button" class="search-button"><i class="fa fa-search"></i></button>
+                    <button type="button" class="search-button">
+                        <i class="fa fa-search"></i>
+                    </button>
                 </div>
             </section>
 
+            <!-- ================================
+                 READING OVERVIEW
+                 - Currently reading & quick stats
+            =================================== -->
             <div class="reading-overview">
+
+                <!-- Currently Reading Shelf -->
                 <section class="currently-reading-bubble">
                     <h2>Currently Reading</h2>
                     <div class="book-row scrollable-row" id="currently-reading">
-
                     </div>
                 </section>
 
+                <!-- Quick Stats Box -->
                 <section class="quick-stats">
                     <div class="quick-stat">
                         <p>Books This Year <span>7</span></p>
@@ -51,16 +79,25 @@
                         <p>Mood <span>😊</span></p>
                     </div>
                 </section>
+
             </div>
 
+            <!-- ================================
+                 BOOK SHELVES NAVIGATION
+                 - Read, Want to Read, Favourites
+            =================================== -->
             <section class="book-shelves">
+
+                <!-- Shelf filter buttons -->
                 <div id="shelves">
                     <button type="button" class="shelf-button active" data-target="read">Read</button>
                     <button type="button" class="shelf-button" data-target="want">Want to Read</button>
                     <button type="button" class="shelf-button" data-target="fav">Favourites</button>
                 </div>
+
                 <hr id="book-shelves-hr" />
 
+                <!-- Read Shelf Content -->
                 <div class="shelf-content" id="shelf-read">
                     <section class="book-category">
                         <h2>Read</h2>
@@ -69,6 +106,7 @@
                     </section>
                 </div>
 
+                <!-- Want to Read Shelf Content -->
                 <div class="shelf-content" id="shelf-want" style="display: none;">
                     <section class="book-category">
                         <h2>Want to Read</h2>
@@ -77,6 +115,7 @@
                     </section>
                 </div>
 
+                <!-- Favourites Shelf Content -->
                 <div class="shelf-content" id="shelf-fav" style="display: none;">
                     <section class="book-category">
                         <h2>Favourites</h2>
@@ -84,15 +123,22 @@
                         </div>
                     </section>
                 </div>
+
             </section>
+
         </div>
     </main>
 </div>
 
+
 <footer>
-    <!-- Copyright or helpful links -->
+    <!-- Add copyright, links, etc -->
 </footer>
 
+<!-- ================================
+     - JavaScript Code
+=================================== -->
 <script src="chaptered.js"></script>
+
 </body>
 </html>

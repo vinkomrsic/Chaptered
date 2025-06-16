@@ -1,6 +1,7 @@
-/* ---------------------------------------------------
+/* ================================
    GLOBAL LAYOUT & BASICS
---------------------------------------------------- */
+   - Page base styling, background, fonts
+================================ */
 body {
     margin: 0;
     padding: 0;
@@ -17,9 +18,10 @@ body {
     min-height: 100vh;
 }
 
-/* ---------------------------------------------------
+/* ================================
    SIDEBAR NAVIGATION
---------------------------------------------------- */
+   - Sidebar, logo, links, header line
+================================ */
 .sidebar {
     background-color: #252f39;
     color: #ffffff;
@@ -80,9 +82,10 @@ body {
     margin-top: 1rem;
 }
 
-/* ---------------------------------------------------
+/* ================================
    MAIN CONTENT AREA
---------------------------------------------------- */
+   - Dashboard box, top banner, back link
+================================ */
 .main-content {
     flex: 1;
     display: flex;
@@ -91,7 +94,7 @@ body {
 }
 
 .dashboard {
-    flex: 1;          
+    flex: 1;
     background-color: #fae6cd;
     border-radius: 0 12px 12px 0;
     padding: 2rem;
@@ -124,9 +127,11 @@ body {
     font-size: 0.9rem;
     color: #2e3a59;
 }
-/* ---------------------------------------------------
+
+/* ================================
    SEARCH & FILTER COMPONENTS
---------------------------------------------------- */
+   - Search bar, tab filters
+================================ */
 .search-box {
     display: flex;
     max-width: 400px;
@@ -178,9 +183,10 @@ body {
     color: #fffaf5;
 }
 
-/* ---------------------------------------------------
+/* ================================
    BOOK SECTIONS & ROWS
---------------------------------------------------- */
+   - Book tiles, rows, shelves
+================================ */
 .reading-overview {
     display: flex;
     justify-content: space-between;
@@ -283,9 +289,10 @@ body {
     color: #fffaf5;
 }
 
-/* ---------------------------------------------------
+/* ================================
    STATS & MOOD BOXES
---------------------------------------------------- */
+   - Quick stats, reflection, mood meta
+================================ */
 .quick-stats {
     flex: 1;
     min-width: 180px;
@@ -309,9 +316,10 @@ body {
     margin-top: 0.25rem;
 }
 
-/* ---------------------------------------------------
+/* ================================
    PROFILE PAGE ONLY
---------------------------------------------------- */
+   - Avatar, bio, reflection box
+================================ */
 .profile-dashboard {
     display: flex;
     flex-direction: column;
@@ -382,9 +390,10 @@ body {
     gap: 0.25rem;
 }
 
-/* ---------------------------------------------------
+/* ================================
    ACCESSIBILITY ENHANCEMENT
---------------------------------------------------- */
+   - Focus outlines for keyboard nav
+================================ */
 .sidebar a:focus,
 .shelf-button:focus,
 .tab:focus,

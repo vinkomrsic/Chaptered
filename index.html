@@ -3,10 +3,17 @@
 <head>
     <meta charset="UTF-8" />
     <title>Login - Chaptered</title>
+    <!-- ================================
+         - Main CSS and FontAwesome icons
+    =================================== -->
     <link rel="stylesheet" href="chaptered.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
 
     <style>
+        /* ================================
+             LOGIN PAGE STYLES
+             - Centered form box and fields
+        =================================== */
         body {
             display: flex;
             justify-content: center;
@@ -46,7 +53,7 @@
         }
 
         .password-wrapper input {
-            padding-right: 2.5rem; /* space for the eye icon */
+            padding-right: 2.5rem; /* space for eye icon */
         }
 
         .password-wrapper button {
@@ -78,10 +85,15 @@
         }
     </style>
 </head>
+
 <body>
+<!-- ================================
+     LOGIN FORM CONTAINER
+=================================== -->
 <div class="login-box">
     <h1>Welcome to Chaptered</h1>
     <form action="/login" method="POST">
+
         <input type="text" name="username" placeholder="Username" required />
 
         <div class="password-wrapper">
@@ -92,32 +104,25 @@
         </div>
 
         <button type="submit">Log In</button>
+
         <p style="margin-top: 1rem;">
             Don't have an account? <a href="signup.html">Sign Up</a>
         </p>
+
     </form>
 </div>
 
+<!-- ================================
+     INLINE JS LOGIC
+     - Save username in local storage when logging in
+=================================== -->
 <script>
     const loginForm = document.querySelector('form');
     loginForm.addEventListener('submit', function(e) {
         const usernameInput = loginForm.querySelector('input[name="username"]');
         localStorage.setItem('username', usernameInput.value);
     });
-
-    function togglePassword() {
-        const passwordInput = document.getElementById('password');
-        const eyeIcon = document.getElementById('eyeIcon');
-        if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            eyeIcon.classList.remove('fa-eye');
-            eyeIcon.classList.add('fa-eye-slash');
-        } else {
-            passwordInput.type = 'password';
-            eyeIcon.classList.remove('fa-eye-slash');
-            eyeIcon.classList.add('fa-eye');
-        }
-    }
 </script>
+<script src="chaptered.js"> </script>
 </body>
 </html>

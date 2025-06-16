@@ -1,6 +1,10 @@
 // ==============================
 // GLOBAL PAGE INIT
 // ==============================
+
+// Runs once DOM is ready
+// - Sets up tabs, search, shelf toggles
+// - Restores book state if on detail page
 document.addEventListener("DOMContentLoaded", function () {
     setupLibraryTabs();
     setupSearch();
@@ -9,7 +13,8 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // ==============================
-// LIBRARY PAGE – Tab Filter
+// LIBRARY PAGE – TAB FILTERS
+// - Shows matching book sections when tab is clicked
 // ==============================
 function setupLibraryTabs() {
     const tabButtons = document.querySelectorAll(".tab");
@@ -26,21 +31,37 @@ function setupLibraryTabs() {
             const filter = button.textContent.trim().toLowerCase();
 
             categories.forEach((section) => {
-                if (section.id === "search-results") return;
-
+                if (section.id === "search-results") return; // never hide search
                 const heading = section.querySelector("h2").textContent.trim().toLowerCase();
-
-                // ✅ Use exact match
                 const matches = filter === "all" || heading === filter;
                 section.style.display = matches ? "block" : "none";
             });
         });
     });
 }
+
+// ==============================
+// UTILITY – TOGGLE PASSWORD EYE
+// - Used on login/signup forms to see the password
+// ==============================
+function togglePassword() {
+    const passwordInput = document.getElementById('password');
+    const eyeIcon = document.getElementById('eyeIcon');
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        eyeIcon.classList.remove('fa-eye');
+        eyeIcon.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        eyeIcon.classList.remove('fa-eye-slash');
+        eyeIcon.classList.add('fa-eye');
+    }
+}
+
 // ==============================
 // SEARCH FUNCTION (Google Books API)
-// - Used across pages with <input name="search">
-// - Displays up to 8 books
+// - Active on pages with <input name="search">
+// - Shows live results, max 8 books
 // ==============================
 function setupSearch() {
     const searchInput = document.querySelector("input[name='search']");
@@ -48,7 +69,6 @@ function setupSearch() {
         document.getElementById("results-container") ||
         document.getElementById("currently-reading");
 
-    // Library: may have #search-results section
     const searchSection = document.getElementById("search-results");
 
     if (!searchInput || !searchResultsWrapper) return;
@@ -85,7 +105,6 @@ function setupSearch() {
             <img src="${thumbnail}" alt="Book Cover" class="book-cover">
             <p class="book-title">${title}</p>
           `;
-
                     searchResultsWrapper.appendChild(tile);
                 });
             });
@@ -93,7 +112,8 @@ function setupSearch() {
 }
 
 // ==============================
-// HOME PAGE – Shelf Button Toggle
+// HOME PAGE – SHELF BUTTON TOGGLE
+// - Toggles shelf content visibility
 // ==============================
 function setupShelfToggle() {
     const shelfButtons = document.querySelectorAll(".shelf-button");
@@ -116,7 +136,8 @@ function setupShelfToggle() {
 }
 
 // ==============================
-// BOOK DETAIL PAGE – Save State
+// BOOK DETAIL PAGE – SAVE BOOK STATE
+// - Stores reading status & mood in localStorage + marks book as saved
 // ==============================
 function saveBookState() {
     const bookId = new URLSearchParams(window.location.search).get("id");
@@ -124,17 +145,15 @@ function saveBookState() {
 
     const progressInput = document.getElementById("progress");
     const moodInput = document.getElementById("mood");
-
     if (!progressInput || !moodInput) return;
 
-    // Save state
     const state = {
         progress: progressInput.value,
         mood: moodInput.value,
     };
     localStorage.setItem(`bookState-${bookId}`, JSON.stringify(state));
 
-    // Also mark the book as saved
+    // Mark as saved in list
     let savedBooks = JSON.parse(localStorage.getItem("savedBooks") || "[]");
     if (!savedBooks.includes(bookId)) {
         savedBooks.push(bookId);
@@ -145,7 +164,8 @@ function saveBookState() {
 }
 
 // ==============================
-// BOOK DETAIL PAGE – Restore State
+// BOOK DETAIL PAGE – RESTORE STATE
+// - Loads saved status & mood if exists
 // ==============================
 function restoreBookState() {
     const bookId = new URLSearchParams(window.location.search).get("id");
@@ -163,14 +183,15 @@ function restoreBookState() {
 }
 
 // ==============================
-// DETAIL NAVIGATION FUNCTION
+// DETAIL PAGE – OPEN BOOK DETAIL VIEW
 // ==============================
 function openBookDetail(bookId) {
     window.location.href = `book.html?id=${bookId}`;
 }
 
 // ==============================
-// LOAD SAVED BOOKS
+// LIBRARY PAGE – LOAD SAVED BOOKS
+// - Fetches from server and shows books in correct shelf
 // ==============================
 function loadSavedBooks() {
     const username = localStorage.getItem('username');
@@ -192,12 +213,11 @@ function loadSavedBooks() {
                 tile.className = 'book-tile';
                 tile.setAttribute('onclick', `openBookDetail('${book.id}')`);
                 tile.innerHTML = `
-                    <img src="${book.thumbnail}" alt="Book Cover" class="book-cover">
-                    <p class="book-title">${book.title}</p>
-                `;
+          <img src="${book.thumbnail}" alt="Book Cover" class="book-cover">
+          <p class="book-title">${book.title}</p>
+        `;
 
                 const shelf = book.progress;
-
                 if (shelf === 'reading') {
                     document.getElementById('reading-books').appendChild(tile);
                 } else if (shelf === 'read') {
@@ -207,18 +227,16 @@ function loadSavedBooks() {
                 } else if (shelf === 'favourite' || shelf === 'fav') {
                     document.getElementById('fav-books').appendChild(tile);
                 } else {
-                    // If no valid shelf, fallback to Favourites
                     document.getElementById('fav-books').appendChild(tile);
                 }
             });
         })
-        .catch(err => {
-            console.error(err);
-        });
+        .catch(err => console.error(err));
 }
 
 // ==============================
-// LOAD SAVED BOOKS ON DASHBOARD
+// DASHBOARD PAGE – LOAD USER BOOKS
+// - Shows current reading, read, want to read on home
 // ==============================
 function loadDashboardBooks() {
     const username = localStorage.getItem('username');
@@ -236,7 +254,6 @@ function loadDashboardBooks() {
           <p class="book-title">${book.title}</p>
         `;
 
-                // Put it in the right section
                 if (book.progress === 'reading') {
                     document.getElementById('currently-reading').appendChild(tile);
                 } else if (book.progress === 'read') {
@@ -251,7 +268,8 @@ function loadDashboardBooks() {
 }
 
 // ==============================
-// FUNCTION TO LOAD PROFILE
+// PROFILE PAGE – LOAD PROFILE DATA
+// - Shows name, bio, stats, favourite books
 // ==============================
 function loadProfile() {
     const username = localStorage.getItem('username');
@@ -263,14 +281,14 @@ function loadProfile() {
             const profile = data.profile;
             const books = data.books;
 
-            // ✅ Update name & bio
+            // Update name & bio
             document.querySelector('.profile-info h2').textContent = profile.name;
             document.querySelector('.profile-bio').textContent = profile.bio;
 
-            // ✅ Update quick stats
+            // Stats
             const booksThisYear = books.filter(b => b.progress === 'read').length;
-            const favouriteGenre = "Mystery"; // placeholder — could compute later
-            const moodTracker = "Dynamic Mood"; // placeholder
+            const favouriteGenre = "Mystery"; // TODO: could calculate
+            const moodTracker = "Dynamic Mood"; // TODO: could calculate
 
             document.querySelector('.quick-stat').innerHTML = `
         <p>📅 Books This Year <span>${booksThisYear}</span></p>
@@ -278,10 +296,10 @@ function loadProfile() {
         <p>💭 Mood Tracker <span>${moodTracker}</span></p>
       `;
 
-            // ✅ Populate favourite books
+            // Favourite books
             const favBooks = books.filter(b => b.progress === 'favourite' || b.progress === 'fav');
             const favContainer = document.querySelector('.book-category .book-row');
-            favContainer.innerHTML = ''; // Clear placeholders
+            favContainer.innerHTML = '';
 
             favBooks.forEach(book => {
                 const tile = document.createElement('div');
@@ -298,7 +316,7 @@ function loadProfile() {
 }
 
 // ==============================
-// END OF FILE
+// MASTER INIT – DECIDE WHICH PAGE NEEDS WHICH DATA
 // ==============================
 document.addEventListener("DOMContentLoaded", () => {
     setupLibraryTabs();
@@ -306,17 +324,12 @@ document.addEventListener("DOMContentLoaded", () => {
     restoreBookState();
     setupShelfToggle();
 
-    //Detect if we're on dashboard.html
     if (window.location.pathname.includes('dashboard')) {
         loadDashboardBooks();
     }
-
-    //Detect if we're on library.html
     if (window.location.pathname.includes('library')) {
         loadSavedBooks();
     }
-
-    //Detect if we're on profile.html
     if (window.location.pathname.includes('profile')) {
         loadProfile();
     }

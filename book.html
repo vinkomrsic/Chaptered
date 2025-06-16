@@ -3,8 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <title>Book Details</title>
+    <!-- ================================
+         - Main CSS and inline page styling
+    =================================== -->
     <link rel="stylesheet" href="chaptered.css">
+
     <style>
+        /* Back button + page layout for book detail */
         .page-header {
             padding: 2rem;
             padding-bottom: 0;
@@ -109,28 +114,43 @@
         }
     </style>
 </head>
+
 <body>
+<!-- ================================
+     BACK TO LIBRARY LINK
+=================================== -->
 <div class="page-header">
     <a href="library.html" class="back-button">Back to Library</a>
 </div>
 
+<!-- ================================
+     BOOK DETAIL CONTENT
+     - Left: book info
+     - Right: extra info + save state
+=================================== -->
 <div class="dashboard">
     <div class="book-detail-container">
+
+        <!-- Book Info (Title, Author, Description) -->
         <div class="left-column">
             <section class="book-info book-detail" id="book-detail">
                 <h2>Loading book...</h2>
             </section>
         </div>
 
+        <!-- Extra Info + Save State Box -->
         <div class="right-column">
-            <section class="book-info extra-book-data" id="extra-info"></section>
+
+            <section class="book-info extra-book-data" id="extra-info">
+                <!-- Populated dynamically with js -->
+            </section>
 
             <section class="book-state">
                 <label for="progress">Reading Status:</label>
                 <select id="progress">
                     <option value="none">Select status</option>
                     <option value="reading">Currently Reading</option>
-                    <option value="read">Finished</option>
+                    <option value="read">Read</option>
                     <option value="want">Want to Read</option>
                 </select>
 
@@ -139,15 +159,19 @@
 
                 <button onclick="saveBookState()">Save</button>
             </section>
+
         </div>
     </div>
 </div>
 
+<!-- ================================
+     - Inline JS only for this page
+=================================== -->
 <script>
     const params = new URLSearchParams(window.location.search);
     const bookId = params.get("id");
 
-    // ✅ These variables store title & thumbnail for later!
+    // Store title + thumbnail for saving
     let savedTitle = "";
     let savedThumbnail = "";
 
@@ -157,23 +181,22 @@
             .then(data => {
                 const info = data.volumeInfo;
 
-                // ✅ Store real title & thumbnail here
                 savedTitle = info.title || "No Title";
                 savedThumbnail = info.imageLinks?.thumbnail || "booksymbol.jpg";
 
                 document.getElementById("book-detail").innerHTML = `
-          <h2>${savedTitle}</h2>
-          <p><strong>Author:</strong> ${info.authors?.join(", ") || "Unknown"}</p>
-          <p><strong>Published:</strong> ${info.publishedDate || "N/A"}</p>
-          <p><strong>Description:</strong> ${info.description || "No description available."}</p>
-          <img src="${savedThumbnail}" class="book-cover">
-        `;
+            <h2>${savedTitle}</h2>
+            <p><strong>Author:</strong> ${info.authors?.join(", ") || "Unknown"}</p>
+            <p><strong>Published:</strong> ${info.publishedDate || "N/A"}</p>
+            <p><strong>Description:</strong> ${info.description || "No description available."}</p>
+            <img src="${savedThumbnail}" class="book-cover">
+          `;
 
                 document.getElementById("extra-info").innerHTML = `
-          <p><strong>Rating:</strong> ${info.averageRating ?? "Not rated"}</p>
-          <p><strong>Pages:</strong> ${info.pageCount ?? "Unknown"}</p>
-          <p><strong>Tags:</strong> ${info.categories?.join(", ") ?? "None"}</p>
-        `;
+            <p><strong>Rating:</strong> ${info.averageRating ?? "Not rated"}</p>
+            <p><strong>Pages:</strong> ${info.pageCount ?? "Unknown"}</p>
+            <p><strong>Tags:</strong> ${info.categories?.join(", ") ?? "None"}</p>
+          `;
             })
             .catch(() => {
                 document.getElementById("book-detail").innerHTML = "<p>Error loading book details.</p>";
@@ -182,12 +205,12 @@
         document.getElementById("book-detail").innerHTML = "<p>No book ID provided.</p>";
     }
 
+    // Save reading status and mood for the book
     function saveBookState() {
         const username = localStorage.getItem('username');
         const progress = document.getElementById('progress').value;
         const mood = document.getElementById('mood').value;
 
-        // ✅ USE the savedTitle and savedThumbnail variables — guaranteed correct!
         fetch('/saveBook', {
             method: 'POST',
             headers: {
@@ -215,5 +238,6 @@
             });
     }
 </script>
+
 </body>
 </html>

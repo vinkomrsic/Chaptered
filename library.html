@@ -3,15 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <title>Library</title>
+    <!-- ================================
+         - Main CSS and FontAwesome icons
+    =================================== -->
     <link rel="stylesheet" href="chaptered.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
-<body>
-<header>
-    <!-- Section that contains the logo, navigation bar, user avatar -->
-</header>
 
+<body>
+
+<header> </header>
+<!-- ================================
+     - Sidebar + Main content area
+=================================== -->
 <div class="layout">
+    <!-- ================================
+         SIDEBAR NAVIGATION
+         - Logo, title, page links
+    =================================== -->
     <nav class="sidebar">
         <div class="sidebar-header">
             <img src="logo.png" alt="logo" width="100px" height="100px" />
@@ -23,20 +32,36 @@
         <a href="profile.html"><i class="fa fa-user"></i> Profile</a>
     </nav>
 
+    <!-- ================================
+         MAIN PAGE CONTENT
+    =================================== -->
     <main class="main-content">
         <div class="dashboard">
+
+            <!-- ================================
+                 LIBRARY HEADER
+            =================================== -->
             <section class="top-box">
                 <h2>Your Library</h2>
             </section>
 
+            <!-- ================================
+                 SEARCH BAR
+                 - Search books (Google Books API)
+            =================================== -->
             <section class="book-search">
                 <div class="search-box">
                     <input type="text" placeholder="Search books" name="search" id="searchInput">
-                    <button type="button" class="search-button" id="searchButton"><i class="fa fa-search"></i></button>
+                    <button type="button" class="search-button" id="searchButton">
+                        <i class="fa fa-search"></i>
+                    </button>
                 </div>
             </section>
 
-            <!-- Tabs for Filtering -->
+            <!-- ================================
+                 TAB FILTER BAR
+                 - All / Favourites / Read / Want to Read
+            =================================== -->
             <div class="tab-bar">
                 <button class="tab active">All</button>
                 <button class="tab">Favourites</button>
@@ -44,17 +69,24 @@
                 <button class="tab">Want to Read</button>
             </div>
 
-            <!-- Dynamic Search Results -->
+            <!-- ================================
+                 SEARCH RESULTS CONTAINER
+                 - Shown when searching
+            =================================== -->
             <section class="book-category" id="search-results" style="display:none;">
                 <h2>Search Results</h2>
                 <div class="book-row scrollable-row" id="results-container"></div>
             </section>
 
-            <!-- Currently Reading -->
+            <!-- ================================
+                 USER SHELVES
+                 - Currently Reading / Read / Favourites / Want to Read
+                 - Filled dynamically by JS
+            =================================== -->
+
             <section class="book-category">
                 <h2>Currently Reading</h2>
-                <div class="book-row" id="reading-books">
-                </div>
+                <div class="book-row" id="reading-books"></div>
             </section>
 
             <section class="book-category">
@@ -71,14 +103,20 @@
                 <h2>Want to Read</h2>
                 <div class="book-row" id="want-books"></div>
             </section>
+
         </div>
     </main>
+
 </div>
 
 <footer>
-    <!-- Copyright or helpful links -->
+    <!-- Add copyright, links, etc -->
 </footer>
 
+<!-- ================================
+     - JavaScript Code
+=================================== -->
 <script src="chaptered.js"></script>
+
 </body>
 </html>

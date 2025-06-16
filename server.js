@@ -1,3 +1,6 @@
+// ================================
+// IMPORTS & BASIC SETUP
+// ================================
 const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
@@ -6,15 +9,24 @@ const path = require('path');
 const app = express();
 const port = 3000;
 
+// Location of the local JSON "database"
 const USERS_FILE = path.join(__dirname, 'users.json');
 
-// Middleware
+
+// Serve static HTML, CSS, JS files
 app.use(express.static(__dirname));
+
+// Parse form submissions (URL encoded) and JSON bodies
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// Helper: Load users from JSON
+// ================================
+// HELPER FUNCTIONS
+// ================================
+
+// Load users from JSON file
 function loadUsers() {
+    // If file doesn't exist, create empty array
     if (!fs.existsSync(USERS_FILE)) {
         fs.writeFileSync(USERS_FILE, '[]');
     }
@@ -22,25 +34,32 @@ function loadUsers() {
     return JSON.parse(data);
 }
 
-// Helper: Save users to JSON
+// Save updated users back to JSON file
 function saveUsers(users) {
     fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
 }
 
-// Root serves index.html automatically
+// ================================
+// ROUTES
+// ================================
 
-// Signup route — with profile fields
+// ----------
+// SIGNUP ROUTE
+// - Accepts POST form data for signup
+// - Adds new user with profile & empty book list
+// ----------
+
 app.post('/signup', (req, res) => {
     const { username, password, email, name, bio } = req.body;
 
     let users = loadUsers();
 
-    // Check if username exists
+    // Prevent duplicate usernames
     if (users.some(u => u.username === username)) {
         return res.send('Username already taken.');
     }
 
-    // Create new user with empty books list and profile
+    // Create user object with nested profile
     const newUser = {
         username,
         password,
@@ -49,7 +68,7 @@ app.post('/signup', (req, res) => {
             name: name || '',
             bio: bio || ''
         },
-        books: []
+        books: [] // empty at first
     };
 
     users.push(newUser);
@@ -59,7 +78,12 @@ app.post('/signup', (req, res) => {
     res.redirect('/');
 });
 
-// Login route — check credentials
+// ----------
+// LOGIN ROUTE
+// - Checks submitted username & password
+// - Redirects to profile on success
+// ----------
+
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
 
@@ -74,14 +98,19 @@ app.post('/login', (req, res) => {
     }
 });
 
-// Save book
+// ----------
+// SAVE BOOK ROUTE
+// - Accepts JSON with username and book object
+// - Adds the book to the user's books array
+// ----------
+
 app.post('/saveBook', (req, res) => {
     const { username, book } = req.body;
     let users = loadUsers();
 
     const user = users.find(u => u.username === username);
     if (user) {
-        user.books.push(book); // book can be title, author, cover, whatever
+        user.books.push(book);
         saveUsers(users);
         res.send('Book saved!');
     } else {
@@ -89,7 +118,11 @@ app.post('/saveBook', (req, res) => {
     }
 });
 
-// Get saved books
+// ----------
+// GET USER'S SAVED BOOKS
+// - Returns JSON array of books for given username
+// ----------
+
 app.get('/getUserBooks/:username', (req, res) => {
     const username = req.params.username;
     const users = loadUsers();
@@ -101,23 +134,16 @@ app.get('/getUserBooks/:username', (req, res) => {
     }
 });
 
-// Debug route to see users
-app.get('/users', (req, res) => {
-    const users = loadUsers();
-    res.json(users);
-});
+// ----------
+// GET USER PROFILE INFO
+// - Returns profile fields + books for given username
+// ----------
 
-app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
-});
-
-// Profile data
 app.get('/getProfile/:username', (req, res) => {
     const username = req.params.username;
     const users = loadUsers();
     const user = users.find(u => u.username === username);
     if (user) {
-        // Return profile + books
         res.json({
             profile: user.profile,
             books: user.books
@@ -125,4 +151,12 @@ app.get('/getProfile/:username', (req, res) => {
     } else {
         res.status(404).json({ error: 'User not found' });
     }
+});
+
+// ================================
+// START SERVER
+// ================================
+
+app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}`);
 });

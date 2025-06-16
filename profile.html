@@ -3,15 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <title>Profile</title>
+  <!-- ================================
+       - Main CSS and FontAwesome icons
+  =================================== -->
   <link rel="stylesheet" href="chaptered.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
-<body>
-<header>
-  <!-- Optional: logo or top nav -->
-</header>
 
+<body>
+
+<header> </header>
+<!-- ================================
+     - Sidebar + Main content area
+=================================== -->
 <div class="layout">
+  <!-- ================================
+       SIDEBAR NAVIGATION
+       - Logo, title, page links
+  =================================== -->
   <nav class="sidebar">
     <div class="sidebar-header">
       <img src="logo.png" alt="logo" width="100px" height="100px" />
@@ -23,10 +32,15 @@
     <a href="#" class="active"><i class="fa fa-user"></i> Profile</a>
   </nav>
 
+  <!-- ================================
+       MAIN PAGE CONTENT
+  =================================== -->
   <main class="main-content">
     <div class="dashboard">
-
-      <!-- Profile Overview Row -->
+      <!-- ================================
+           PROFILE OVERVIEW
+           - Avatar, name, bio, quick stats
+      =================================== -->
       <section class="profile-overview">
         <div class="profile-card">
           <img src="profilepic.jpg" class="profile-avatar" alt="Profile">
@@ -42,10 +56,15 @@
         </div>
       </section>
 
-      <!-- Mood Reflection Box -->
+      <!-- ================================
+           LAST REFLECTION BOX
+           - Most recent reading note
+      =================================== -->
       <section class="reflection-box">
         <h3>📖 Last Reflection</h3>
-        <p class="reflection-text">"This book really made me question my values. The ending left me completely speechless — I had to sit with it for a while."</p>
+        <p class="reflection-text">
+          "This book really made me question my values. The ending left me completely speechless — I had to sit with it for a while."
+        </p>
         <div class="mood-meta">
           <span>📍 Read at: Park Bench</span>
           <span>🎵 Soundtrack: <a href="#">Lo-Fi Beats</a></span>
@@ -53,7 +72,9 @@
         </div>
       </section>
 
-      <!-- Favorite Books -->
+      <!-- ================================
+           FAVOURITE BOOKS
+      =================================== -->
       <section class="book-category">
         <h2>🌟 Favourite Books</h2>
         <div class="book-row">
@@ -62,12 +83,17 @@
 
     </div>
   </main>
+
 </div>
 
 <footer>
-  <!-- Optional footer content -->
+  <!-- Add copyright, links, etc -->
 </footer>
 
+<!-- ================================
+     - JavaScript Code
+=================================== -->
 <script src="chaptered.js"></script>
+
 </body>
 </html>
