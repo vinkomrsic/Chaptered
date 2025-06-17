@@ -118,6 +118,24 @@ app.post('/saveBook', (req, res) => {
 });
 
 // ----------
+// REMOVE BOOK ROUTE
+// - Deletes a book by ID for given user
+// ----------
+app.post('/removeBook', (req, res) => {
+    const { username, bookId } = req.body;
+    let users = loadUsers();
+
+    const user = users.find(u => u.username === username);
+    if (user) {
+        user.books = user.books.filter(b => b.id !== bookId);
+        saveUsers(users);
+        res.send('Book removed!');
+    } else {
+        res.send('User not found.');
+    }
+});
+
+// ----------
 // GET USER'S SAVED BOOKS
 // ----------
 app.get('/getUserBooks/:username', (req, res) => {

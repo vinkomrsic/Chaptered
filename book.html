@@ -157,7 +157,7 @@
                 <label for="mood">Mood:</label>
                 <input type="text" id="mood" placeholder="e.g. Inspired, Curious">
 
-                <button onclick="saveBookState()">Save</button>
+                <button id="saveRemoveButton" onclick="toggleSaveRemove()">Save</button>
                 <button id="favButton" onclick="toggleFavourite()">
                     <i id="favIcon" class="fa fa-star-o"></i> Favourite
                 </button>
@@ -167,119 +167,137 @@
     </div>
 </div>
 
-<!-- ================================
-     - Inline JS only for this page
-=================================== -->
 <script>
+    // ================================
+    // BOOK DETAIL PAGE SCRIPT
+    // -------------------------------
+    // 1) Fetch & display book info
+    // 2) Restore saved data (progress, mood, favourite)
+    // 3) Save OR remove book on toggle
+    // 4) Toggle favourite (star icon)
+    // ================================
+
     const params = new URLSearchParams(window.location.search);
     const bookId = params.get("id");
-
-    // Store title & thumbnail for server save
     let savedTitle = "";
     let savedThumbnail = "";
-    let currentFavourite = false; // ⭐️ Track current favourite status
+    let isSaved = false;
+    let currentFavourite = false;
 
+    // Load book data + check save status
     if (bookId) {
         fetch(`https://www.googleapis.com/books/v1/volumes/${bookId}`)
             .then(res => res.json())
             .then(data => {
                 const info = data.volumeInfo;
-
                 savedTitle = info.title || "No Title";
                 savedThumbnail = info.imageLinks?.thumbnail || "booksymbol.jpg";
 
                 document.getElementById("book-detail").innerHTML = `
-                    <h2>${savedTitle}</h2>
-                    <p><strong>Author:</strong> ${info.authors?.join(", ") || "Unknown"}</p>
-                    <p><strong>Published:</strong> ${info.publishedDate || "N/A"}</p>
-                    <p><strong>Description:</strong> ${info.description || "No description available."}</p>
-                    <img src="${savedThumbnail}" class="book-cover">
-                `;
+          <h2>${savedTitle}</h2>
+          <p><strong>Author:</strong> ${info.authors?.join(", ") || "Unknown"}</p>
+          <p><strong>Published:</strong> ${info.publishedDate || "N/A"}</p>
+          <p><strong>Description:</strong> ${info.description || "No description available."}</p>
+          <img src="${savedThumbnail}" class="book-cover">
+        `;
 
                 document.getElementById("extra-info").innerHTML = `
-                    <p><strong>Rating:</strong> ${info.averageRating ?? "Not rated"}</p>
-                    <p><strong>Pages:</strong> ${info.pageCount ?? "Unknown"}</p>
-                    <p><strong>Tags:</strong> ${info.categories?.join(", ") ?? "None"}</p>
-                `;
+          <p><strong>Rating:</strong> ${info.averageRating ?? "Not rated"}</p>
+          <p><strong>Pages:</strong> ${info.pageCount ?? "Unknown"}</p>
+          <p><strong>Tags:</strong> ${info.categories?.join(", ") ?? "None"}</p>
+        `;
 
-                // Also load current saved favourite (if exists)
-                restoreBookState();
+                checkIfSaved();
             })
             .catch(() => {
                 document.getElementById("book-detail").innerHTML = "<p>Error loading book details.</p>";
             });
-    } else {
-        document.getElementById("book-detail").innerHTML = "<p>No book ID provided.</p>";
     }
 
-    // SAVE BOOK: progress, mood, favourite
-    function saveBookState() {
-        const bookId = new URLSearchParams(window.location.search).get("id");
-        if (!bookId) return;
-
-        const progressInput = document.getElementById("progress");
-        const moodInput = document.getElementById("mood");
-        if (!progressInput || !moodInput) return;
-
-        // Save to localStorage (optional)
-        const state = {
-            progress: progressInput.value,
-            mood: moodInput.value,
-            favourite: currentFavourite
-        };
-        localStorage.setItem(`bookState-${bookId}`, JSON.stringify(state));
-
-        // Also save server-side
+    // Check server if book is already saved → update button + restore local values
+    function checkIfSaved() {
         const username = localStorage.getItem('username');
-        fetch('/saveBook', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                username: username,
-                book: {
-                    id: bookId,
-                    title: savedTitle,
-                    thumbnail: savedThumbnail,
-                    progress: progressInput.value,
-                    mood: moodInput.value,
-                    favourite: currentFavourite
+        fetch(`/getUserBooks/${username}`)
+            .then(res => res.json())
+            .then(books => {
+                const match = books.find(b => b.id === bookId);
+                isSaved = !!match;
+                if (match) {
+                    document.getElementById("progress").value = match.progress || "none";
+                    document.getElementById("mood").value = match.mood || "";
+                    currentFavourite = !!match.favourite;
+                } else {
+                    currentFavourite = false;
                 }
-            })
-        })
-            .then(() => {
-                console.log("Book saved to server.");
-            })
-            .catch(err => console.error(err));
-
-        alert("Book saved to your library!");
+                updateFavIcon();
+                updateSaveRemoveButton();
+            });
     }
 
-    // FAVOURITE BUTTON: toggle state + icon + server update
+    // Toggle save/remove
+    function toggleSaveRemove() {
+        const username = localStorage.getItem('username');
+        const progress = document.getElementById("progress").value;
+        const mood = document.getElementById("mood").value;
+
+        if (isSaved) {
+            // Remove
+            fetch('/removeBook', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ username, bookId })
+            })
+                .then(() => {
+                    isSaved = false;
+                    updateSaveRemoveButton();
+                    alert("Book removed from your library!");
+                });
+        } else {
+            // Save
+            fetch('/saveBook', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    username,
+                    book: {
+                        id: bookId,
+                        title: savedTitle,
+                        thumbnail: savedThumbnail,
+                        progress,
+                        mood,
+                        favourite: currentFavourite
+                    }
+                })
+            })
+                .then(() => {
+                    isSaved = true;
+                    updateSaveRemoveButton();
+                    alert("Book saved to your library!");
+                });
+        }
+    }
+
+    // Toggle favourite star & re-save
     function toggleFavourite() {
         currentFavourite = !currentFavourite;
-        const icon = document.getElementById('favIcon');
-        icon.className = currentFavourite ? 'fa fa-star' : 'fa fa-star-o';
+        updateFavIcon();
 
-        // Save immediately when toggled
-        saveBookState();
+        // If book is already saved, update favourite immediately
+        if (isSaved) {
+            toggleSaveRemove(); // removes
+            toggleSaveRemove(); // re-saves with new fav flag
+        }
     }
 
-    // RESTORE BOOK STATE (progress, mood, favourite)
-    function restoreBookState() {
-        const bookId = new URLSearchParams(window.location.search).get("id");
-        if (!bookId) return;
+    // Helpers to update UI
+    function updateFavIcon() {
+        const icon = document.getElementById('favIcon');
+        icon.className = currentFavourite ? 'fa fa-star' : 'fa fa-star-o';
+    }
 
-        const saved = localStorage.getItem(`bookState-${bookId}`);
-        if (saved) {
-            const { progress, mood, favourite } = JSON.parse(saved);
-            document.getElementById("progress").value = progress || "none";
-            document.getElementById("mood").value = mood || "";
-            currentFavourite = favourite || false;
-
-            // Update star icon
-            const icon = document.getElementById('favIcon');
-            icon.className = currentFavourite ? 'fa fa-star' : 'fa fa-star-o';
-        }
+    function updateSaveRemoveButton() {
+        const btn = document.getElementById("saveRemoveButton");
+        btn.textContent = isSaved ? "Remove" : "Save";
     }
 </script>
 
