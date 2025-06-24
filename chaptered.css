@@ -400,3 +400,135 @@ body {
 .search-button:focus {
     outline: 2px solid #e6a57e;
 }
+
+/* ================================
+   EXPLORE PAGE – Tabs, Form, Posts
+================================ */
+
+/* Tabs */
+.explore-header {
+    margin: 2rem 0 1rem 0;
+}
+
+.explore-tab {
+    background-color: #e6a57e;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    color: #2e3a59;
+    font-weight: bold;
+    cursor: pointer;
+    margin-right: 0.5rem;
+    transition: 0.2s ease;
+}
+
+.explore-tab.active {
+    background-color: #2e3a59;
+    color: #fffaf5;
+}
+
+/* Post Form (reflection-box is reused) */
+.reflection-box {
+    background-color: #fffaf5;
+    border: 1px solid #e0d6ca;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.reflection-box h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: #2e3a59;
+}
+
+.reflection-box label {
+    display: block;
+    margin: 0.75rem 0 0.25rem 0;
+    font-size: 0.9rem;
+    color: #2e3a59;
+}
+
+.reflection-box input,
+.reflection-box textarea {
+    width: 100%;
+    padding: 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+.reflection-box textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.reflection-box button {
+    margin-top: 1rem;
+    background-color: #e6a57e;
+    border: none;
+    padding: 0.6rem 1.5rem;
+    border-radius: 8px;
+    color: #2e3a59;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.reflection-box button:hover {
+    background-color: #2e3a59;
+    color: #fffaf5;
+}
+
+/* Posts Container & Individual Post */
+#explore-posts {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.post {
+    background-color: #fffaf5;
+    border: 1px solid #e0d6ca;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    color: #2e3a59;
+}
+
+.post strong {
+    color: #2e3a59;
+}
+
+.post p {
+    margin: 0.5rem 0 0.5rem 0;
+    line-height: 1.5;
+}
+
+.post img {
+    margin-top: 0.5rem;
+    border-radius: 8px;
+    max-width: 100%;
+    height: auto;
+}
+
+.post a {
+    display: inline-block;
+    margin-top: 0.5rem;
+    color: #e6a57e;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.post a:hover {
+    text-decoration: underline;
+}
+
+.post small {
+    display: block;
+    margin-top: 0.75rem;
+    color: #6d6d6d;
+    font-size: 0.85rem;
+}
