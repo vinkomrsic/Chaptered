@@ -289,18 +289,34 @@ function loadDashboardBooks() {
 // ==============================
 function addPost() {
     const username = localStorage.getItem('username');
-    const content = document.getElementById('postContent')?.value.trim();
-    if (!content) return alert('Please write something!');
+    const content = document.getElementById('postContent').value.trim();
+    const bookId = document.getElementById('postBook').value.trim();
+    const photoUrl = document.getElementById('postPhoto').value.trim();
+    const musicUrl = document.getElementById('postMusic').value.trim();
+    const location = document.getElementById('postLocation').value.trim();
+
+    if (!content) return alert('Write something!');
 
     fetch('/addPost', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, content })
+        body: JSON.stringify({
+            username,
+            content,
+            bookId,
+            photoUrl,
+            musicUrl,
+            location
+        })
     })
         .then(res => res.text())
         .then(msg => {
             alert(msg);
             document.getElementById('postContent').value = '';
+            document.getElementById('postBook').value = '';
+            document.getElementById('postPhoto').value = '';
+            document.getElementById('postMusic').value = '';
+            document.getElementById('postLocation').value = '';
             loadUserPosts();
         });
 }
@@ -318,7 +334,15 @@ function loadUserPosts() {
             posts.forEach(post => {
                 const div = document.createElement('div');
                 div.className = 'post';
-                div.innerHTML = `<p>${post.content}</p><small>${new Date(post.createdAt).toLocaleString()}</small>`;
+
+                div.innerHTML = `
+          ${post.bookId ? `<strong>Book ID:</strong> ${post.bookId}<br>` : ''}
+          <p>${post.content}</p>
+          ${post.photoUrl ? `<img src="${post.photoUrl}" alt="Attached Photo" style="max-width:200px;"><br>` : ''}
+          ${post.musicUrl ? `<a href="${post.musicUrl}" target="_blank">Listen 🎵</a><br>` : ''}
+          ${post.location ? `<small>📍 ${post.location}</small><br>` : ''}
+          <small>${new Date(post.createdAt).toLocaleString()}</small>
+        `;
                 container.appendChild(div);
             });
         });

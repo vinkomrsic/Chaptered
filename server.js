@@ -170,29 +170,28 @@ app.get('/getProfile/:username', (req, res) => {
 // ADD POST ROUTE
 // ==========
 app.post('/addPost', (req, res) => {
-    const { username, bookId, content } = req.body;
+    const { username, bookId, content, photoUrl, musicUrl, location } = req.body;
 
     let users = loadUsers();
     const user = users.find(u => u.username === username);
-    if (!user) {
-        return res.send('User not found.');
-    }
+    if (!user) return res.send('User not found.');
 
-    if (!user.posts) {
-        user.posts = [];
-    }
+    if (!user.posts) user.posts = [];
 
     const newPost = {
-        id: Date.now().toString(), // simple unique ID
+        id: Date.now().toString(),
         bookId: bookId || null,
-        content: content,
+        content,
+        photoUrl: photoUrl || null,
+        musicUrl: musicUrl || null,
+        location: location || null,
         createdAt: new Date().toISOString()
     };
 
     user.posts.push(newPost);
     saveUsers(users);
 
-    console.log(`New post added for ${username}`);
+    console.log(`New post for ${username}`);
     res.send('Post added!');
 });
 
@@ -202,12 +201,13 @@ app.post('/addPost', (req, res) => {
 // ==========
 app.get('/getPosts/:username', (req, res) => {
     const username = req.params.username;
-    let users = loadUsers();
+    const users = loadUsers();
     const user = users.find(u => u.username === username);
-    if (!user) {
-        return res.status(404).send('User not found.');
+    if (user && user.posts) {
+        res.json(user.posts);
+    } else {
+        res.json([]);
     }
-    res.json(user.posts || []);
 });
 
 // ================================

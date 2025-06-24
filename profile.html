@@ -62,7 +62,19 @@
       =================================== -->
       <section class="reflection-box">
         <h2>Your Posts</h2>
-        <textarea id="postContent" placeholder="Write a quote, thought, or opinion..."></textarea>
+        <label for="postBook">Attach Book (optional):</label>
+        <input id="postBook" placeholder="Book ID">
+
+        <label for="postPhoto">Photo URL (optional):</label>
+        <input id="postPhoto" placeholder="https://...">
+
+        <label for="postMusic">Music URL (optional):</label>
+        <input id="postMusic" placeholder="Spotify or YouTube URL">
+
+        <label for="postLocation">Location (optional):</label>
+        <input id="postLocation" placeholder="Where did you read?">
+
+        <textarea id="postContent" placeholder="Write your thoughts..."></textarea>
         <button onclick="addPost()">Post</button>
 
         <div id="postsContainer"></div>
