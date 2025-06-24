@@ -1,18 +1,13 @@
 // ==============================
 // GLOBAL INIT
 // ------------------------------
-// Runs when DOM is ready:
-// - Sets up library tabs, search bar, shelf toggle on Home
-// - Restores book state on Book Detail page
-// - Loads saved books or profile if needed
-// ==============================
 document.addEventListener("DOMContentLoaded", () => {
     setupLibraryTabs();
     setupSearch();
-    restoreBookState();
     setupShelfToggle();
+    restoreBookState();
 
-    if (window.location.pathname.includes('dashboard')) {
+    if (window.location.pathname.includes('dashboard') || window.location.pathname.includes('home')) {
         loadDashboardBooks();
     }
     if (window.location.pathname.includes('library')) {
@@ -20,14 +15,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (window.location.pathname.includes('profile')) {
         loadProfile();
+        loadUserPosts(); // <-- ensure posts show on profile
     }
 });
 
 // ==============================
 // LIBRARY – TABS FILTER
-// ------------------------------
-// Filters library page sections (Read, Favourites, etc)
-// when user clicks a tab
 // ==============================
 function setupLibraryTabs() {
     const tabButtons = document.querySelectorAll(".tab");
@@ -36,18 +29,15 @@ function setupLibraryTabs() {
 
     if (!tabButtons.length || !categories.length) return;
 
-    tabButtons.forEach((button) => {
+    tabButtons.forEach(button => {
         button.addEventListener("click", () => {
-            tabButtons.forEach((btn) => btn.classList.remove("active"));
+            tabButtons.forEach(btn => btn.classList.remove("active"));
             button.classList.add("active");
-
             const filter = button.textContent.trim().toLowerCase();
-
-            categories.forEach((section) => {
-                if (section.id === "search-results") return; // Never hide search
+            categories.forEach(section => {
+                if (section.id === "search-results") return;
                 const heading = section.querySelector("h2").textContent.trim().toLowerCase();
-                const matches = filter === "all" || heading === filter;
-                section.style.display = matches ? "block" : "none";
+                section.style.display = (filter === "all" || heading === filter) ? "block" : "none";
             });
         });
     });
@@ -55,40 +45,33 @@ function setupLibraryTabs() {
 
 // ==============================
 // PASSWORD FIELD – TOGGLE VISIBILITY
-// ------------------------------
-// Used in login/signup forms to show/hide password text
 // ==============================
 function togglePassword() {
     const passwordInput = document.getElementById('password');
     const eyeIcon = document.getElementById('eyeIcon');
-    if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        eyeIcon.classList.replace('fa-eye', 'fa-eye-slash');
-    } else {
-        passwordInput.type = 'password';
-        eyeIcon.classList.replace('fa-eye-slash', 'fa-eye');
+    if (passwordInput && eyeIcon) {
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            eyeIcon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            eyeIcon.classList.replace('fa-eye-slash', 'fa-eye');
+        }
     }
 }
 
 // ==============================
 // SEARCH BAR – GOOGLE BOOKS API
-// ------------------------------
-// Works on Home & Library pages
-// Shows live results for up to 8 books
 // ==============================
 function setupSearch() {
-    const searchInput = document.querySelector("input[name='search']");
-    const searchResultsWrapper =
-        document.getElementById("results-container") ||
-        document.getElementById("currently-reading");
-
+    const searchInput = document.querySelector("input[name='search']") || document.getElementById('dashboard-search');
+    const searchResultsWrapper = document.getElementById("results-container") || document.getElementById("currently-reading");
     const searchSection = document.getElementById("search-results");
 
     if (!searchInput || !searchResultsWrapper) return;
 
     searchInput.addEventListener("input", function () {
         const query = this.value.trim();
-
         if (!query) {
             searchResultsWrapper.innerHTML = "";
             if (searchSection) searchSection.style.display = "none";
@@ -96,27 +79,19 @@ function setupSearch() {
         }
 
         fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`)
-            .then((res) => res.json())
-            .then((data) => {
+            .then(res => res.json())
+            .then(data => {
                 const books = data.items?.slice(0, 8) || [];
                 searchResultsWrapper.innerHTML = "";
-
-                if (searchSection) {
-                    searchSection.style.display = books.length ? "block" : "none";
-                }
-
-                books.forEach((item) => {
+                if (searchSection) searchSection.style.display = books.length ? "block" : "none";
+                books.forEach(item => {
                     const info = item.volumeInfo;
-                    const title = info.title || "No title";
-                    const thumbnail = info.imageLinks?.thumbnail || "booksymbol.jpg";
-                    const bookId = item.id;
-
                     const tile = document.createElement("div");
                     tile.className = "book-tile";
-                    tile.setAttribute("onclick", `openBookDetail('${bookId}')`);
+                    tile.setAttribute("onclick", `openBookDetail('${item.id}')`);
                     tile.innerHTML = `
-                        <img src="${thumbnail}" alt="Book Cover" class="book-cover">
-                        <p class="book-title">${title}</p>
+                        <img src="${info.imageLinks?.thumbnail || 'booksymbol.jpg'}" alt="Book Cover" class="book-cover">
+                        <p class="book-title">${info.title || 'No title'}</p>
                     `;
                     searchResultsWrapper.appendChild(tile);
                 });
@@ -126,25 +101,19 @@ function setupSearch() {
 
 // ==============================
 // HOME PAGE – SHELF BUTTONS
-// ------------------------------
-// Toggles visibility for Read, Want to Read, Favourites
-// on the dashboard/home page
 // ==============================
 function setupShelfToggle() {
     const shelfButtons = document.querySelectorAll(".shelf-button");
     const shelfContents = document.querySelectorAll(".shelf-content");
-
     if (!shelfButtons.length || !shelfContents.length) return;
 
-    shelfButtons.forEach((button) => {
+    shelfButtons.forEach(button => {
         button.addEventListener("click", () => {
             const targetId = "shelf-" + button.dataset.target;
-
-            shelfButtons.forEach((btn) => btn.classList.remove("active"));
+            shelfButtons.forEach(btn => btn.classList.remove("active"));
             button.classList.add("active");
-
-            shelfContents.forEach((content) => {
-                content.style.display = content.id === targetId ? "block" : "none";
+            shelfContents.forEach(content => {
+                content.style.display = (content.id === targetId) ? "block" : "none";
             });
         });
     });
@@ -152,10 +121,11 @@ function setupShelfToggle() {
 
 // ==============================
 // BOOK DETAIL PAGE – SAVE STATE
-// ------------------------------
-// Saves reading status, mood, and favourite flag to server
-// Also updates localStorage state for progress & mood
 // ==============================
+let savedTitle = "";
+let savedThumbnail = "";
+let currentFavourite = false;
+
 function saveBookState() {
     const bookId = new URLSearchParams(window.location.search).get("id");
     if (!bookId) return;
@@ -164,26 +134,18 @@ function saveBookState() {
     const moodInput = document.getElementById("mood");
     if (!progressInput || !moodInput) return;
 
-    // Use the global `currentFavourite` flag (set in toggleFavourite)
     const state = {
         progress: progressInput.value,
         mood: moodInput.value,
     };
     localStorage.setItem(`bookState-${bookId}`, JSON.stringify(state));
 
-    let savedBooks = JSON.parse(localStorage.getItem("savedBooks") || "[]");
-    if (!savedBooks.includes(bookId)) {
-        savedBooks.push(bookId);
-        localStorage.setItem("savedBooks", JSON.stringify(savedBooks));
-    }
-
-    // Also send updated book to server with favourite flag
     const username = localStorage.getItem('username');
     fetch('/saveBook', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            username: username,
+            username,
             book: {
                 id: bookId,
                 title: savedTitle,
@@ -200,11 +162,7 @@ function saveBookState() {
 
 // ==============================
 // BOOK DETAIL PAGE – RESTORE STATE
-// ------------------------------
-// Loads local reading status, mood and checks server for favourite flag
 // ==============================
-let currentFavourite = false; // global for toggleFavourite()
-
 function restoreBookState() {
     const bookId = new URLSearchParams(window.location.search).get("id");
     if (!bookId) return;
@@ -218,16 +176,20 @@ function restoreBookState() {
         if (moodInput) moodInput.value = mood || "";
     }
 
-    // Also get favourite flag from server
     const username = localStorage.getItem('username');
     if (username) {
         fetch(`/getUserBooks/${username}`)
             .then(res => res.json())
             .then(books => {
                 const savedBook = books.find(b => b.id === bookId);
-                if (savedBook && savedBook.favourite) {
-                    currentFavourite = true;
-                    document.getElementById('favIcon').className = 'fa fa-star';
+                if (savedBook) {
+                    savedTitle = savedBook.title;
+                    savedThumbnail = savedBook.thumbnail;
+                    if (savedBook.favourite) {
+                        currentFavourite = true;
+                        const icon = document.getElementById('favIcon');
+                        if (icon) icon.className = 'fa fa-star';
+                    }
                 }
             });
     }
@@ -235,22 +197,16 @@ function restoreBookState() {
 
 // ==============================
 // FAVOURITE BUTTON – TOGGLE STAR
-// ------------------------------
-// Updates global flag + icon, then re-saves to server
 // ==============================
 function toggleFavourite() {
     currentFavourite = !currentFavourite;
     const icon = document.getElementById('favIcon');
-    icon.className = currentFavourite ? 'fa fa-star' : 'fa fa-star-o';
-
-    // Also push to server immediately
+    if (icon) icon.className = currentFavourite ? 'fa fa-star' : 'fa fa-star-o';
     saveBookState();
 }
 
 // ==============================
 // BOOK DETAIL – OPEN PAGE NAV
-// ------------------------------
-// Universal helper to open detail page for given ID
 // ==============================
 function openBookDetail(bookId) {
     window.location.href = `book.html?id=${bookId}`;
@@ -258,20 +214,15 @@ function openBookDetail(bookId) {
 
 // ==============================
 // LIBRARY PAGE – LOAD SAVED BOOKS
-// ------------------------------
-// Loads saved books from server & displays in the correct shelf
 // ==============================
 function loadSavedBooks() {
     const username = localStorage.getItem('username');
-    if (!username) {
-        alert("You must be logged in to view your library.");
-        return;
-    }
+    if (!username) return alert("You must be logged in to view your library.");
 
-    document.getElementById('reading-books').innerHTML = '';
-    document.getElementById('read-books').innerHTML = '';
-    document.getElementById('want-books').innerHTML = '';
-    document.getElementById('fav-books').innerHTML = '';
+    ['reading-books', 'read-books', 'want-books', 'fav-books'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '';
+    });
 
     fetch(`/getUserBooks/${username}`)
         .then(res => res.json())
@@ -280,34 +231,25 @@ function loadSavedBooks() {
                 const tile = document.createElement('div');
                 tile.className = 'book-tile';
                 tile.setAttribute('onclick', `openBookDetail('${book.id}')`);
-                tile.innerHTML = `
-        <img src="${book.thumbnail}" alt="Book Cover" class="book-cover">
-        <p class="book-title">${book.title}</p>
-    `;
-
-                const shelf = book.progress;
-
-                if (shelf === 'reading') {
+                tile.innerHTML = `<img src="${book.thumbnail}" class="book-cover"><p class="book-title">${book.title}</p>`;
+                if (book.progress === 'reading') {
                     document.getElementById('reading-books').appendChild(tile);
                 }
-                if (shelf === 'read') {
+                if (book.progress === 'read') {
                     document.getElementById('read-books').appendChild(tile);
                 }
-                if (shelf === 'want') {
+                if (book.progress === 'want') {
                     document.getElementById('want-books').appendChild(tile);
                 }
-                if (book.favourite === true) {
+                if (book.favourite) {
                     document.getElementById('fav-books').appendChild(tile);
                 }
             });
-        })
-        .catch(err => console.error(err));
+        });
 }
 
 // ==============================
-// DASHBOARD – LOAD BOOKS FOR HOME
-// ------------------------------
-// Shows current reading, read, want, fav on home
+// DASHBOARD – LOAD BOOKS & STATS
 // ==============================
 function loadDashboardBooks() {
     const username = localStorage.getItem('username');
@@ -316,35 +258,74 @@ function loadDashboardBooks() {
     fetch(`/getUserBooks/${username}`)
         .then(res => res.json())
         .then(books => {
+            const booksThisYear = books.filter(b => b.progress === 'read').length;
+            const favouriteGenre = "Mystery"; // TODO: dynamic later
+            const moodTracker = "Dynamic Mood"; // TODO: dynamic later
+
+            const statBox = document.querySelector('.quick-stat');
+            if (statBox) {
+                statBox.innerHTML = `
+                    <p><i class="fa fa-calendar"></i> Books This Year <span>${booksThisYear}</span></p>
+                    <p><i class="fa fa-book"></i> Favorite Genre <span>${favouriteGenre}</span></p>
+                    <p><i class="fa fa-comment"></i> Mood Tracker <span>${moodTracker}</span></p>
+                `;
+            }
+
             books.forEach(book => {
                 const tile = document.createElement('div');
                 tile.className = 'book-tile';
                 tile.setAttribute('onclick', `openBookDetail('${book.id}')`);
-                tile.innerHTML = `
-        <img src="${book.thumbnail}" alt="Book Cover" class="book-cover">
-        <p class="book-title">${book.title}</p>
-    `;
-
-                if (book.progress === 'reading') {
-                    document.getElementById('currently-reading').appendChild(tile);
-                }
-                if (book.progress === 'read') {
-                    document.getElementById('dashboard-read').appendChild(tile);
-                }
-                if (book.progress === 'want') {
-                    document.getElementById('dashboard-want').appendChild(tile);
-                }
-                if (book.favourite === true) {
-                    document.getElementById('dashboard-fav').appendChild(tile);
-                }
+                tile.innerHTML = `<img src="${book.thumbnail}" class="book-cover"><p class="book-title">${book.title}</p>`;
+                if (book.progress === 'reading') document.getElementById('currently-reading').appendChild(tile);
+                if (book.progress === 'read') document.getElementById('dashboard-read').appendChild(tile);
+                if (book.progress === 'want') document.getElementById('dashboard-want').appendChild(tile);
+                if (book.favourite) document.getElementById('dashboard-fav').appendChild(tile);
             });
         });
 }
 
 // ==============================
-// PROFILE PAGE – LOAD PROFILE
-// ------------------------------
-// Loads name, bio, stats, favourites for profile page
+// POSTS – ADD & LOAD
+// ==============================
+function addPost() {
+    const username = localStorage.getItem('username');
+    const content = document.getElementById('postContent')?.value.trim();
+    if (!content) return alert('Please write something!');
+
+    fetch('/addPost', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, content })
+    })
+        .then(res => res.text())
+        .then(msg => {
+            alert(msg);
+            document.getElementById('postContent').value = '';
+            loadUserPosts();
+        });
+}
+
+function loadUserPosts() {
+    const username = localStorage.getItem('username');
+    if (!username) return;
+
+    fetch(`/getPosts/${username}`)
+        .then(res => res.json())
+        .then(posts => {
+            const container = document.getElementById('postsContainer');
+            if (!container) return;
+            container.innerHTML = '';
+            posts.forEach(post => {
+                const div = document.createElement('div');
+                div.className = 'post';
+                div.innerHTML = `<p>${post.content}</p><small>${new Date(post.createdAt).toLocaleString()}</small>`;
+                container.appendChild(div);
+            });
+        });
+}
+
+// ==============================
+// PROFILE PAGE – LOAD PROFILE INFO
 // ==============================
 function loadProfile() {
     const username = localStorage.getItem('username');
@@ -360,29 +341,29 @@ function loadProfile() {
             document.querySelector('.profile-bio').textContent = profile.bio;
 
             const booksThisYear = books.filter(b => b.progress === 'read').length;
-            const favouriteGenre = "Mystery"; // Placeholder
-            const moodTracker = "Dynamic Mood"; // Placeholder
+            const favouriteGenre = "Mystery";
+            const moodTracker = "Dynamic Mood";
 
-            document.querySelector('.quick-stat').innerHTML = `
-                <p><i class="fa fa-calendar"></i> Books This Year <span>${booksThisYear}</span></p>
-                <p><i class="fa fa-book"></i> Favorite Genre <span>${favouriteGenre}</span></p>
-                <p><i class="fa fa-comment"></i> Mood Tracker <span>${moodTracker}</span></p>
-            `;
-
-            const favBooks = books.filter(b => b.favourite === true);
-            const favContainer = document.querySelector('.book-category .book-row');
-            favContainer.innerHTML = '';
-
-            favBooks.forEach(book => {
-                const tile = document.createElement('div');
-                tile.className = 'book-tile';
-                tile.setAttribute('onclick', `openBookDetail('${book.id}')`);
-                tile.innerHTML = `
-                    <img src="${book.thumbnail}" alt="Book Cover" class="book-cover">
-                    <p class="book-title">${book.title}</p>
+            const statBox = document.querySelector('.quick-stat');
+            if (statBox) {
+                statBox.innerHTML = `
+                    <p><i class="fa fa-calendar"></i> Books This Year <span>${booksThisYear}</span></p>
+                    <p><i class="fa fa-book"></i> Favorite Genre <span>${favouriteGenre}</span></p>
+                    <p><i class="fa fa-comment"></i> Mood Tracker <span>${moodTracker}</span></p>
                 `;
-                favContainer.appendChild(tile);
-            });
-        })
-        .catch(err => console.error(err));
+            }
+
+            const favBooks = books.filter(b => b.favourite);
+            const favContainer = document.querySelector('.book-category .book-row');
+            if (favContainer) {
+                favContainer.innerHTML = '';
+                favBooks.forEach(book => {
+                    const tile = document.createElement('div');
+                    tile.className = 'book-tile';
+                    tile.setAttribute('onclick', `openBookDetail('${book.id}')`);
+                    tile.innerHTML = `<img src="${book.thumbnail}" class="book-cover"><p class="book-title">${book.title}</p>`;
+                    favContainer.appendChild(tile);
+                });
+            }
+        });
 }

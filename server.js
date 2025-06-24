@@ -166,6 +166,50 @@ app.get('/getProfile/:username', (req, res) => {
     }
 });
 
+// ==========
+// ADD POST ROUTE
+// ==========
+app.post('/addPost', (req, res) => {
+    const { username, bookId, content } = req.body;
+
+    let users = loadUsers();
+    const user = users.find(u => u.username === username);
+    if (!user) {
+        return res.send('User not found.');
+    }
+
+    if (!user.posts) {
+        user.posts = [];
+    }
+
+    const newPost = {
+        id: Date.now().toString(), // simple unique ID
+        bookId: bookId || null,
+        content: content,
+        createdAt: new Date().toISOString()
+    };
+
+    user.posts.push(newPost);
+    saveUsers(users);
+
+    console.log(`New post added for ${username}`);
+    res.send('Post added!');
+});
+
+
+// ==========
+// GET POSTS
+// ==========
+app.get('/getPosts/:username', (req, res) => {
+    const username = req.params.username;
+    let users = loadUsers();
+    const user = users.find(u => u.username === username);
+    if (!user) {
+        return res.status(404).send('User not found.');
+    }
+    res.json(user.posts || []);
+});
+
 // ================================
 // START SERVER
 // ================================
