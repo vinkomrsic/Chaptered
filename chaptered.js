@@ -1,3 +1,6 @@
+// Cache for the user's books for explore posts & picker
+let userBooksCache = [];
+
 // ==============================
 // GLOBAL INIT
 // ==============================
@@ -416,16 +419,95 @@ function renderExplorePosts(posts) {
         const div = document.createElement('div');
         div.className = 'post';
 
+        // ✅ If post has bookId, show TITLE + COVER from cache
+        let bookHtml = '';
+        if (post.bookId) {
+            const match = userBooksCache.find(b => b.id === post.bookId);
+            if (match) {
+                bookHtml = `
+                    <div class="post-book-info">
+                        <img src="${match.thumbnail}" width="40" style="vertical-align:middle;">
+                        <span>${match.title}</span>
+                    </div>
+                `;
+            } else {
+                bookHtml = `<strong>📖 Book:</strong> ${post.bookId}<br>`;
+            }
+        }
+
         div.innerHTML = `
             <strong>${post.username ? post.username : 'You'}</strong><br>
-            ${post.bookId ? `<strong>📖 Book:</strong> ${post.bookId}<br>` : ''}
+            ${bookHtml}
             <p>${post.content}</p>
             ${post.photoUrl ? `<img src="${post.photoUrl}" style="max-width:200px;"><br>` : ''}
             ${post.musicUrl ? `<a href="${post.musicUrl}" target="_blank">🎵 Listen</a><br>` : ''}
             ${post.location ? `<small>📍 ${post.location}</small><br>` : ''}
             <small>${new Date(post.createdAt).toLocaleString()}</small>
         `;
+
         container.appendChild(div);
     });
 }
 
+// ==============================
+// EXPLORE – Open book picker with "No Book" option
+// ==============================
+function openBookPicker() {
+    const username = localStorage.getItem('username');
+    fetch(`/getUserBooks/${username}`)
+        .then(res => res.json())
+        .then(books => {
+            userBooksCache = books; // ✅ Save to cache for later
+
+            const list = document.getElementById('bookPickerList');
+            list.innerHTML = '';
+
+            // Add "No Book" option at top
+            const none = document.createElement('div');
+            none.className = 'book-picker-item';
+            none.textContent = 'No Book';
+            none.onclick = () => selectBook(null);
+            list.appendChild(none);
+
+            // Add all user books
+            books.forEach(book => {
+                const item = document.createElement('div');
+                item.className = 'book-picker-item';
+                item.innerHTML = `
+                    <img src="${book.thumbnail}" width="40" height="auto">
+                    <span>${book.title}</span>
+                `;
+                item.onclick = () => selectBook(book);
+                list.appendChild(item);
+            });
+
+            document.getElementById('bookPickerModal').style.display = 'flex';
+        });
+}
+
+// ==============================
+// EXPLORE – Select a book or "No Book"
+// ==============================
+function selectBook(book) {
+    if (book) {
+        document.getElementById('postBook').value = book.id;
+        document.getElementById('selectedBookTitle').textContent = book.title;
+        const cover = document.getElementById('selectedBookCover');
+        cover.src = book.thumbnail;
+        cover.style.display = 'inline-block';
+    } else {
+        // No book selected
+        document.getElementById('postBook').value = '';
+        document.getElementById('selectedBookTitle').textContent = 'Click to select a book';
+        document.getElementById('selectedBookCover').style.display = 'none';
+    }
+
+    closeBookPicker();
+}
+
+// ==============================
+// EXPLORE – Close book picker modal
+// ==============================
+function closeBookPicker() {
+    document.getElementById('bookPickerModal').style.display = 'none';
+}

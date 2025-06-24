@@ -532,3 +532,62 @@ body {
     color: #6d6d6d;
     font-size: 0.85rem;
 }
+
+/* ================================
+   EXPLORE PAGE – Book picker
+================================ */
+.book-picker-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.book-picker-content {
+    background: #fffaf5;
+    padding: 2rem;
+    border-radius: 12px;
+    max-width: 400px;
+    width: 90%;
+    max-height: 80%;
+    overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.book-picker-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    padding: 0.5rem;
+    border-radius: 8px;
+}
+
+.book-picker-item:hover {
+    background: #fef4e8;
+}
+
+.book-selector {
+    background: #fffaf5;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.post-book {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+}

@@ -52,8 +52,20 @@
       <section class="reflection-box">
         <h3>Create a New Post</h3>
 
-        <label for="postBook">Attach Book ID (optional):</label>
-        <input id="postBook" placeholder="Book ID">
+        <label>Attach Book (optional):</label>
+        <div class="book-selector" onclick="openBookPicker()">
+          <span id="selectedBookTitle">Click to select a book</span>
+          <img id="selectedBookCover" alt="Book cover" style="display:none; width: 60px; height: auto; margin-left: 1rem;">
+        </div>
+        <input type="hidden" id="postBook">
+
+        <div id="bookPickerModal" class="book-picker-modal">
+          <div class="book-picker-content">
+            <h3>Select a Book</h3>
+            <div id="bookPickerList"></div>
+            <button onclick="closeBookPicker()">Close</button>
+          </div>
+        </div>
 
         <label for="postPhoto">Photo URL (optional):</label>
         <input id="postPhoto" placeholder="https://...">
@@ -95,6 +107,18 @@
      - JavaScript Code
 =================================== -->
 <script src="chaptered.js"></script>
+<script>
+  if (window.location.pathname.includes('explore')) {
+  const username = localStorage.getItem('username');
+  fetch(`/getUserBooks/${username}`)
+  .then(res => res.json())
+  .then(books => {
+  userBooksCache = books; // store once
+  setupExploreTabs();
+  loadGlobalPosts();
+  });
+  }
+</script>
 
 </body>
 </html>
