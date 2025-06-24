@@ -1,21 +1,26 @@
 // ==============================
 // GLOBAL INIT
-// ------------------------------
+// ==============================
 document.addEventListener("DOMContentLoaded", () => {
     setupLibraryTabs();
     setupSearch();
     setupShelfToggle();
     restoreBookState();
 
-    if (window.location.pathname.includes('dashboard') || window.location.pathname.includes('home')) {
+    const path = window.location.pathname;
+
+    if (path.includes('dashboard') || path.includes('home')) {
         loadDashboardBooks();
     }
-    if (window.location.pathname.includes('library')) {
+    if (path.includes('library')) {
         loadSavedBooks();
     }
-    if (window.location.pathname.includes('profile')) {
+    if (path.includes('profile')) {
         loadProfile();
-        loadUserPosts(); // <-- ensure posts show on profile
+    }
+    if (path.includes('explore')) {
+        setupExploreTabs();
+        loadGlobalPosts();
     }
 });
 
@@ -321,33 +326,6 @@ function addPost() {
         });
 }
 
-function loadUserPosts() {
-    const username = localStorage.getItem('username');
-    if (!username) return;
-
-    fetch(`/getPosts/${username}`)
-        .then(res => res.json())
-        .then(posts => {
-            const container = document.getElementById('postsContainer');
-            if (!container) return;
-            container.innerHTML = '';
-            posts.forEach(post => {
-                const div = document.createElement('div');
-                div.className = 'post';
-
-                div.innerHTML = `
-          ${post.bookId ? `<strong>Book ID:</strong> ${post.bookId}<br>` : ''}
-          <p>${post.content}</p>
-          ${post.photoUrl ? `<img src="${post.photoUrl}" alt="Attached Photo" style="max-width:200px;"><br>` : ''}
-          ${post.musicUrl ? `<a href="${post.musicUrl}" target="_blank">Listen 🎵</a><br>` : ''}
-          ${post.location ? `<small>📍 ${post.location}</small><br>` : ''}
-          <small>${new Date(post.createdAt).toLocaleString()}</small>
-        `;
-                container.appendChild(div);
-            });
-        });
-}
-
 // ==============================
 // PROFILE PAGE – LOAD PROFILE INFO
 // ==============================
@@ -391,3 +369,63 @@ function loadProfile() {
             }
         });
 }
+
+// ==============================
+// EXPLORE – Tabs
+// ==============================
+function setupExploreTabs() {
+    const tabs = document.querySelectorAll('.explore-tab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            const mode = tab.dataset.mode;
+            if (mode === 'global') loadGlobalPosts();
+            else loadMyPosts();
+        });
+    });
+}
+
+// ==============================
+// EXPLORE – Load Global + My Posts
+// ==============================
+function loadGlobalPosts() {
+    fetch('/getAllPosts')
+        .then(res => res.json())
+        .then(posts => renderExplorePosts(posts));
+}
+
+function loadMyPosts() {
+    const username = localStorage.getItem('username');
+    fetch(`/getPosts/${username}`)
+        .then(res => res.json())
+        .then(posts => renderExplorePosts(posts));
+}
+
+function renderExplorePosts(posts) {
+    const container = document.getElementById('explore-posts');
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (posts.length === 0) {
+        container.innerHTML = '<p>No posts yet.</p>';
+        return;
+    }
+
+    posts.forEach(post => {
+        const div = document.createElement('div');
+        div.className = 'post';
+
+        div.innerHTML = `
+            <strong>${post.username ? post.username : 'You'}</strong><br>
+            ${post.bookId ? `<strong>📖 Book:</strong> ${post.bookId}<br>` : ''}
+            <p>${post.content}</p>
+            ${post.photoUrl ? `<img src="${post.photoUrl}" style="max-width:200px;"><br>` : ''}
+            ${post.musicUrl ? `<a href="${post.musicUrl}" target="_blank">🎵 Listen</a><br>` : ''}
+            ${post.location ? `<small>📍 ${post.location}</small><br>` : ''}
+            <small>${new Date(post.createdAt).toLocaleString()}</small>
+        `;
+        container.appendChild(div);
+    });
+}
+

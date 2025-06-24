@@ -210,6 +210,27 @@ app.get('/getPosts/:username', (req, res) => {
     }
 });
 
+// =========
+// GET ALL POSTS (Global Explore)
+// =========
+app.get('/getAllPosts', (req, res) => {
+    const users = loadUsers();
+    let allPosts = [];
+    users.forEach(user => {
+        if (user.posts) {
+            user.posts.forEach(post => {
+                allPosts.push({
+                    username: user.username, // optional, shows who posted
+                    ...post
+                });
+            });
+        }
+    });
+    // Newest first
+    allPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    res.json(allPosts);
+});
+
 // ================================
 // START SERVER
 // ================================

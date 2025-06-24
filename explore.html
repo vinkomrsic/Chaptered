@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Profile</title>
+  <title>Explore</title>
   <!-- ================================
        - Main CSS and FontAwesome icons
   =================================== -->
@@ -11,15 +11,15 @@
 </head>
 
 <body>
-
 <header> </header>
+
 <!-- ================================
      - Sidebar + Main content area
 =================================== -->
 <div class="layout">
+
   <!-- ================================
        SIDEBAR NAVIGATION
-       - Logo, title, page links
   =================================== -->
   <nav class="sidebar">
     <div class="sidebar-header">
@@ -29,8 +29,8 @@
 
     <a href="dashboard.html"><i class="fa fa-home"></i> Home</a>
     <a href="library.html"><i class="fa fa-book"></i> Library</a>
-    <a href="explore.html"><i class="fa fa-compass"></i> Explore</a>
-    <a href="#" class="active"><i class="fa fa-user"></i> Profile</a>
+    <a href="explore.html" class="active"><i class="fa fa-compass"></i> Explore</a>
+    <a href="profile.html"><i class="fa fa-user"></i> Profile</a>
   </nav>
 
   <!-- ================================
@@ -38,33 +38,49 @@
   =================================== -->
   <main class="main-content">
     <div class="dashboard">
-      <!-- ================================
-           PROFILE OVERVIEW
-           - Avatar, name, bio, quick stats
-      =================================== -->
-      <section class="profile-overview">
-        <div class="profile-card">
-          <img src="profilepic.jpg" class="profile-avatar" alt="Profile">
-          <div class="profile-info">
-            <h2>Vinko Mrsic</h2>
-            <p class="profile-bio">Reading to reflect, not just to escape.</p>
-          </div>
-        </div>
 
-        <div class="quick-stats">
-          <div class="quick-stat">
-          </div>
+      <!-- ================================
+           EXPLORE HEADER – TABS
+      =================================== -->
+      <section class="top-box">
+        <h2>Welcome Back!</h2>
+      </section>
+
+      <section class="explore-header">
+        <div>
+          <button class="explore-tab active" data-mode="global">Global Posts</button>
+          <button class="explore-tab" data-mode="my">My Posts</button>
         </div>
       </section>
 
       <!-- ================================
-           FAVOURITE BOOKS
+           POST FORM
       =================================== -->
-      <section class="book-category">
-        <h2>🌟 Favourite Books</h2>
-        <div class="book-row">
-        </div>
+      <section class="reflection-box">
+        <h3>Create a New Post</h3>
+
+        <label for="postBook">Attach Book ID (optional):</label>
+        <input id="postBook" placeholder="Book ID">
+
+        <label for="postPhoto">Photo URL (optional):</label>
+        <input id="postPhoto" placeholder="https://...">
+
+        <label for="postMusic">Music URL (optional):</label>
+        <input id="postMusic" placeholder="Spotify or YouTube URL">
+
+        <label for="postLocation">Location (optional):</label>
+        <input id="postLocation" placeholder="Where did you read?">
+
+        <label for="postContent">Your Thoughts:</label>
+        <textarea id="postContent" placeholder="Write your thoughts..."></textarea>
+
+        <button onclick="addPost()">Post</button>
       </section>
+
+      <!-- ================================
+           POSTS CONTAINER
+      =================================== -->
+      <section id="explore-posts"></section>
 
     </div>
   </main>
