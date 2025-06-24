@@ -279,25 +279,57 @@
 
     // Toggle favourite star & re-save
     function toggleFavourite() {
+        // 1) Flip the flag immediately
         currentFavourite = !currentFavourite;
+
+        // 2) Always update the icon immediately
         updateFavIcon();
 
-        // If book is already saved, update favourite immediately
+        // 3) If the book is saved, send an update to server
+        const username = localStorage.getItem('username');
         if (isSaved) {
-            toggleSaveRemove(); // removes
-            toggleSaveRemove(); // re-saves with new fav flag
-        }
-    }
+            const progress = document.getElementById("progress").value;
+            const mood = document.getElementById("mood").value;
 
-    // Helpers to update UI
-    function updateFavIcon() {
-        const icon = document.getElementById('favIcon');
-        icon.className = currentFavourite ? 'fa fa-star' : 'fa fa-star-o';
+            fetch('/saveBook', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    username,
+                    book: {
+                        id: bookId,
+                        title: savedTitle,
+                        thumbnail: savedThumbnail,
+                        progress,
+                        mood,
+                        favourite: currentFavourite
+                    }
+                })
+            })
+                .then(res => res.text())
+                .then(msg => {
+                    console.log(msg);
+                    // No double toggle! Just update.
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("Failed to update favourite on server.");
+                });
+
+        } else {
+            // Not saved yet — inform user clearly
+            alert("Please save this book first to mark it as favourite.");
+        }
     }
 
     function updateSaveRemoveButton() {
         const btn = document.getElementById("saveRemoveButton");
         btn.textContent = isSaved ? "Remove" : "Save";
+    }
+
+    function updateFavIcon() {
+        const icon = document.getElementById('favIcon');
+        icon.className = currentFavourite ? 'fa fa-star' : 'fa fa-star-o';
     }
 </script>
 

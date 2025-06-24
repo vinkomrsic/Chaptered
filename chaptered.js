@@ -281,20 +281,22 @@ function loadSavedBooks() {
                 tile.className = 'book-tile';
                 tile.setAttribute('onclick', `openBookDetail('${book.id}')`);
                 tile.innerHTML = `
-                    <img src="${book.thumbnail}" alt="Book Cover" class="book-cover">
-                    <p class="book-title">${book.title}</p>
-                `;
+        <img src="${book.thumbnail}" alt="Book Cover" class="book-cover">
+        <p class="book-title">${book.title}</p>
+    `;
 
                 const shelf = book.progress;
+
                 if (shelf === 'reading') {
                     document.getElementById('reading-books').appendChild(tile);
-                } else if (shelf === 'read') {
+                }
+                if (shelf === 'read') {
                     document.getElementById('read-books').appendChild(tile);
-                } else if (shelf === 'want') {
+                }
+                if (shelf === 'want') {
                     document.getElementById('want-books').appendChild(tile);
-                } else if (book.favourite === true) {
-                    document.getElementById('fav-books').appendChild(tile);
-                } else {
+                }
+                if (book.favourite === true) {
                     document.getElementById('fav-books').appendChild(tile);
                 }
             });
@@ -319,29 +321,20 @@ function loadDashboardBooks() {
                 tile.className = 'book-tile';
                 tile.setAttribute('onclick', `openBookDetail('${book.id}')`);
                 tile.innerHTML = `
-                    <img src="${book.thumbnail}" alt="Book Cover" class="book-cover">
-                    <p class="book-title">${book.title}</p>
-                `;
-
-                const booksThisYear = books.filter(b => b.progress === 'read').length;
-                const favouriteGenre = "Mystery"; // Placeholder
-                const moodTracker = "Dynamic Mood"; // Placeholder
-
-                document.querySelector('.quick-stat').innerHTML = `
-                    <p><i class="fa fa-calendar"></i> Books This Year <span>${booksThisYear}</span></p>
-                    <p><i class="fa fa-book"></i> Favorite Genre <span>${favouriteGenre}</span></p>
-                    <p><i class="fa fa-comment"></i> Mood Tracker <span>${moodTracker}</span></p>
-                `;
+        <img src="${book.thumbnail}" alt="Book Cover" class="book-cover">
+        <p class="book-title">${book.title}</p>
+    `;
 
                 if (book.progress === 'reading') {
                     document.getElementById('currently-reading').appendChild(tile);
-                } else if (book.progress === 'read') {
+                }
+                if (book.progress === 'read') {
                     document.getElementById('dashboard-read').appendChild(tile);
-                } else if (book.progress === 'want') {
+                }
+                if (book.progress === 'want') {
                     document.getElementById('dashboard-want').appendChild(tile);
-                } else if (book.favourite === true) {
-                    document.getElementById('dashboard-fav').appendChild(tile);
-                } else {
+                }
+                if (book.favourite === true) {
                     document.getElementById('dashboard-fav').appendChild(tile);
                 }
             });
