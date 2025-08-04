@@ -6,7 +6,7 @@
     <!-- ================================
        - Main CSS and FontAwesome icons
   =================================== -->
-    <link rel="stylesheet" href="chaptered.css">
+    <link rel="stylesheet" href="css/chaptered.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
         /* Back button + page layout for book detail */
@@ -277,7 +277,7 @@
         }
     }
 
-    // Toggle favourite star & re-save
+    // Toggle favourite star and re-save
     function toggleFavourite() {
         // 1) Flip the flag immediately
         currentFavourite = !currentFavourite;
@@ -309,7 +309,6 @@
                 .then(res => res.text())
                 .then(msg => {
                     console.log(msg);
-                    // No double toggle! Just update.
                 })
                 .catch(err => {
                     console.error(err);

@@ -2,18 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title>Login - Chaptered</title>
+    <title>Sign Up - Chaptered</title>
     <!-- ================================
          - Main CSS and FontAwesome icons
     =================================== -->
-    <link rel="stylesheet" href="chaptered.css" />
+    <link rel="stylesheet" href="css/chaptered.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
 
     <style>
         /* ================================
-             LOGIN PAGE STYLES
+             SIGN UP PAGE STYLES
              - Centered form box and fields
         =================================== */
+
         body {
             display: flex;
             justify-content: center;
@@ -24,7 +25,7 @@
             font-family: sans-serif;
         }
 
-        .login-box {
+        .signup-box {
             background: #ffffff;
             padding: 2rem;
             border-radius: 12px;
@@ -34,12 +35,13 @@
             text-align: center;
         }
 
-        .login-box h1 {
+        .signup-box h1 {
             margin-bottom: 1rem;
             color: #2e3a59;
         }
 
-        .login-box input {
+        .signup-box input,
+        .signup-box textarea {
             width: 100%;
             padding: 0.75rem;
             margin: 0.5rem 0;
@@ -53,7 +55,7 @@
         }
 
         .password-wrapper input {
-            padding-right: 2.5rem; /* space for eye icon */
+            padding-right: 2.5rem;
         }
 
         .password-wrapper button {
@@ -68,7 +70,7 @@
             font-size: 1rem;
         }
 
-        .login-box button[type="submit"] {
+        .signup-box button[type="submit"] {
             width: 100%;
             padding: 0.75rem;
             background-color: #e6a57e;
@@ -80,7 +82,7 @@
             margin-top: 1rem;
         }
 
-        .login-box button[type="submit"]:hover {
+        .signup-box button[type="submit"]:hover {
             background-color: #d8926d;
         }
     </style>
@@ -88,13 +90,16 @@
 
 <body>
 <!-- ================================
-     LOGIN FORM CONTAINER
+     SIGN UP FORM CONTAINER
 =================================== -->
-<div class="login-box">
-    <h1>Welcome to Chaptered</h1>
-    <form action="/login" method="POST">
+<div class="signup-box">
+    <h1>Create Your Chaptered Account</h1>
+    <form action="/signup" method="POST">
 
         <input type="text" name="username" placeholder="Username" required />
+        <input type="email" name="email" placeholder="Email" required />
+        <input type="text" name="name" placeholder="Your Name" required />
+        <textarea name="bio" placeholder="A short bio..." rows="3"></textarea>
 
         <div class="password-wrapper">
             <input type="password" id="password" name="password" placeholder="Password" required />
@@ -103,26 +108,19 @@
             </button>
         </div>
 
-        <button type="submit">Log In</button>
+        <button type="submit">Sign Up</button>
 
         <p style="margin-top: 1rem;">
-            Don't have an account? <a href="signup.html">Sign Up</a>
+            Already have an account? <a href="index.html">Log In</a>
         </p>
 
     </form>
 </div>
 
 <!-- ================================
-     INLINE JS LOGIC
-     - Save username in local storage when logging in
+     - JavaScript Code
 =================================== -->
-<script>
-    const loginForm = document.querySelector('form');
-    loginForm.addEventListener('submit', function(e) {
-        const usernameInput = loginForm.querySelector('input[name="username"]');
-        localStorage.setItem('username', usernameInput.value);
-    });
-</script>
-<script src="chaptered.js"> </script>
+<script src="js/chaptered.js"></script>
+
 </body>
 </html>

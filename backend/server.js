@@ -232,6 +232,23 @@ app.get('/getAllPosts', async (req, res) => {
 });
 
 // ================================
+// STATIC FILES & ROOT ROUTE
+// ================================
+
+// Serve everything inside the "public" folder (or project root if no folder)
+app.use(express.static(path.join(__dirname, '../frontend')));
+
+// Root route -> serve index.html
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/index.html'));
+});
+
+// Optional: catch-all for unknown routes -> could show 404 page or redirect home
+app.use((req, res) => {
+    res.status(404).sendFile(path.join(__dirname, '../frontend/index.html'));
+});
+
+// ================================
 // START SERVER
 // ================================
 app.listen(port, () => {
