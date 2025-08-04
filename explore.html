@@ -3,24 +3,120 @@
 <head>
   <meta charset="UTF-8">
   <title>Explore</title>
-  <!-- ================================
-       - Main CSS and FontAwesome icons
-  =================================== -->
   <link rel="stylesheet" href="chaptered.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <style>
+    .reflection-box {
+      background-color: #fffaf6;
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .create-post-button {
+      background-color: #e6a57e;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-weight: bold;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 1rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      transition: background-color 0.3s;
+    }
+
+    .create-post-button:hover {
+      background-color: #d89268;
+    }
+
+    .post-form-container {
+      background-color: #fffefc;
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+    }
+
+    .post-form-container.hidden {
+      display: none;
+    }
+
+    .post-form-container input,
+    .post-form-container textarea {
+      width: 100%;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .post-form-container button {
+      background-color: #e6a57e;
+      color: white;
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .explore-header {
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .explore-tab {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 6px;
+      margin-right: 0.5rem;
+      cursor: pointer;
+    }
+
+    .explore-tab.active {
+      background-color: #2e3a59;
+      color: white;
+    }
+
+    .book-selector {
+      background-color: #fef4e8;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-block;
+      margin-bottom: 1rem;
+    }
+
+    /* Book Picker Modal */
+    .book-picker-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .book-picker-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+  </style>
 </head>
 
 <body>
-<header> </header>
+<header></header>
 
-<!-- ================================
-     - Sidebar + Main content area
-=================================== -->
 <div class="layout">
-
-  <!-- ================================
-       SIDEBAR NAVIGATION
-  =================================== -->
   <nav class="sidebar">
     <div class="sidebar-header">
       <img src="logo.png" alt="logo" width="100px" height="100px" />
@@ -33,55 +129,43 @@
     <a href="profile.html"><i class="fa fa-user"></i> Profile</a>
   </nav>
 
-  <!-- ================================
-       MAIN PAGE CONTENT
-  =================================== -->
   <main class="main-content">
     <div class="dashboard">
-
-      <!-- ================================
-           EXPLORE HEADER – TABS
-      =================================== -->
       <section class="top-box">
         <h2>Explore Page</h2>
       </section>
 
-      <!-- ================================
-           POST FORM
-      =================================== -->
+      <!-- Create Post Button + Form -->
       <section class="reflection-box">
-        <h3>Create a New Post</h3>
+        <button id="togglePostForm" class="create-post-button">
+          <i class="fa fa-plus"></i> Create a New Post
+        </button>
 
-        <label>Attach Book (optional):</label>
-        <div class="book-selector" onclick="openBookPicker()">
-          <span id="selectedBookTitle">Click to select a book</span>
-          <img id="selectedBookCover" alt="Book cover" style="display:none; width: 60px; height: auto; margin-left: 1rem;">
-        </div>
-        <input type="hidden" id="postBook">
-
-        <div id="bookPickerModal" class="book-picker-modal">
-          <div class="book-picker-content">
-            <h3>Select a Book</h3>
-            <div id="bookPickerList"></div>
-            <button onclick="closeBookPicker()">Close</button>
+        <div id="postFormContainer" class="post-form-container hidden">
+          <label>Attach Book (optional):</label>
+          <div class="book-selector" onclick="openBookPicker()">
+            <span id="selectedBookTitle">Click to select a book</span>
+            <img id="selectedBookCover" alt="Book cover" style="display:none; width: 60px; height: auto; margin-left: 1rem;">
           </div>
+          <input type="hidden" id="postBook">
+
+          <label for="postPhoto">Photo URL (optional):</label>
+          <input id="postPhoto" placeholder="https://...">
+
+          <label for="postMusic">Music URL (optional):</label>
+          <input id="postMusic" placeholder="Spotify or YouTube URL">
+
+          <label for="postLocation">Location (optional):</label>
+          <input id="postLocation" placeholder="Where did you read?">
+
+          <label for="postContent">Your Thoughts:</label>
+          <textarea id="postContent" placeholder="Write your thoughts..." rows="4"></textarea>
+
+          <button onclick="addPost()">Post</button>
         </div>
-
-        <label for="postPhoto">Photo URL (optional):</label>
-        <input id="postPhoto" placeholder="https://...">
-
-        <label for="postMusic">Music URL (optional):</label>
-        <input id="postMusic" placeholder="Spotify or YouTube URL">
-
-        <label for="postLocation">Location (optional):</label>
-        <input id="postLocation" placeholder="Where did you read?">
-
-        <label for="postContent">Your Thoughts:</label>
-        <textarea id="postContent" placeholder="Write your thoughts..."></textarea>
-
-        <button onclick="addPost()">Post</button>
       </section>
 
+      <!-- Tabs for Posts -->
       <section class="explore-header">
         <div>
           <button class="explore-tab active" data-mode="global">Global Posts</button>
@@ -89,36 +173,43 @@
         </div>
       </section>
 
-      <!-- ================================
-           POSTS CONTAINER
-      =================================== -->
+      <!-- Post Container -->
       <section id="explore-posts"></section>
-
     </div>
   </main>
-
 </div>
 
-<footer>
-  <!-- Add copyright, links, etc -->
-</footer>
+<div id="bookPickerModal" class="book-picker-modal">
+  <div class="book-picker-content">
+    <h3>Select a Book</h3>
+    <div id="bookPickerList"></div>
+    <button onclick="closeBookPicker()">Close</button>
+  </div>
+</div>
 
-<!-- ================================
-     - JavaScript Code
-=================================== -->
+<footer></footer>
+
 <script src="chaptered.js"></script>
 <script>
-  if (window.location.pathname.includes('explore')) {
-  const username = localStorage.getItem('username');
-  fetch(`/getUserBooks/${username}`)
-  .then(res => res.json())
-  .then(books => {
-  userBooksCache = books; // store once
-  setupExploreTabs();
-  loadGlobalPosts();
+  // Toggle post form visibility
+  const toggleBtn = document.getElementById("togglePostForm");
+  const formContainer = document.getElementById("postFormContainer");
+
+  toggleBtn.addEventListener("click", () => {
+    formContainer.classList.toggle("hidden");
   });
+
+  // Load explore page data
+  if (window.location.pathname.includes('explore')) {
+    const username = localStorage.getItem('username');
+    fetch(`/getUserBooks/${username}`)
+            .then(res => res.json())
+            .then(books => {
+              userBooksCache = books;
+              setupExploreTabs();
+              loadGlobalPosts();
+            });
   }
 </script>
-
 </body>
 </html>

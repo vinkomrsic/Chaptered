@@ -1,4 +1,4 @@
-// Cache for the user's books for explore posts & picker
+// Cache for the user's books for explore posts and picker
 let userBooksCache = [];
 
 // ==============================
@@ -227,34 +227,55 @@ function loadSavedBooks() {
     const username = localStorage.getItem('username');
     if (!username) return alert("You must be logged in to view your library.");
 
-    ['reading-books', 'read-books', 'want-books', 'fav-books'].forEach(id => {
+    // Clear all library sections
+    ['reading-books', 'read-books', 'want-books', 'fav-books', 'all-books'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.innerHTML = '';
     });
 
     fetch(`/getUserBooks/${username}`)
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return res.json();
+        })
         .then(books => {
+            console.log("📚 Loaded books:", books);
+
+            // If no books, show friendly message but no alert
+            if (!books || books.length === 0) {
+                document.getElementById('all-books').innerHTML = `<p>No books in your library yet.</p>`;
+                return;
+            }
+
             books.forEach(book => {
                 const tile = document.createElement('div');
                 tile.className = 'book-tile';
                 tile.setAttribute('onclick', `openBookDetail('${book.id}')`);
-                tile.innerHTML = `<img src="${book.thumbnail}" class="book-cover"><p class="book-title">${book.title}</p>`;
-                if (book.progress === 'reading') {
-                    document.getElementById('reading-books').appendChild(tile);
-                }
-                if (book.progress === 'read') {
-                    document.getElementById('read-books').appendChild(tile);
-                }
-                if (book.progress === 'want') {
-                    document.getElementById('want-books').appendChild(tile);
-                }
+                tile.innerHTML = `
+                    <img src="${book.thumbnail}" class="book-cover">
+                    <p class="book-title">${book.title}</p>
+                `;
+
+                // Place in main progress categories
+                if (book.progress === 'reading') document.getElementById('reading-books')?.appendChild(tile.cloneNode(true));
+                if (book.progress === 'read') document.getElementById('read-books')?.appendChild(tile.cloneNode(true));
+                if (book.progress === 'want') document.getElementById('want-books')?.appendChild(tile.cloneNode(true));
+
+                // Always place in "All Books" as a fallback
+                document.getElementById('all-books')?.appendChild(tile);
+
+                // If favourite, also in favourites section
                 if (book.favourite) {
-                    document.getElementById('fav-books').appendChild(tile);
+                    document.getElementById('fav-books')?.appendChild(tile.cloneNode(true));
                 }
             });
+        })
+        .catch(err => {
+            // Only show alert for real network/server errors
+            console.error("❌ Failed to load books:", err);
         });
 }
+
 
 // ==============================
 // DASHBOARD – LOAD BOOKS & STATS
@@ -263,12 +284,21 @@ function loadDashboardBooks() {
     const username = localStorage.getItem('username');
     if (!username) return;
 
+    // Clear dashboard book rows
+    ['currently-reading', 'dashboard-read', 'dashboard-want', 'dashboard-fav', 'dashboard-all'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '';
+    });
+
     fetch(`/getUserBooks/${username}`)
         .then(res => res.json())
         .then(books => {
+            console.log("📊 Dashboard books:", books);
+
+            // Example stats (you can calculate real ones later)
             const booksThisYear = books.filter(b => b.progress === 'read').length;
-            const favouriteGenre = "Mystery"; // TODO: dynamic later
-            const moodTracker = "Dynamic Mood"; // TODO: dynamic later
+            const favouriteGenre = books.length > 0 ? "TBD Genre" : "—";
+            const moodTracker = "Coming Soon";
 
             const statBox = document.querySelector('.quick-stat');
             if (statBox) {
@@ -279,16 +309,32 @@ function loadDashboardBooks() {
                 `;
             }
 
+            if (!books || books.length === 0) {
+                document.getElementById('dashboard-all').innerHTML = `<p>No books yet. Start reading!</p>`;
+                return;
+            }
+
             books.forEach(book => {
                 const tile = document.createElement('div');
                 tile.className = 'book-tile';
                 tile.setAttribute('onclick', `openBookDetail('${book.id}')`);
-                tile.innerHTML = `<img src="${book.thumbnail}" class="book-cover"><p class="book-title">${book.title}</p>`;
-                if (book.progress === 'reading') document.getElementById('currently-reading').appendChild(tile);
-                if (book.progress === 'read') document.getElementById('dashboard-read').appendChild(tile);
-                if (book.progress === 'want') document.getElementById('dashboard-want').appendChild(tile);
-                if (book.favourite) document.getElementById('dashboard-fav').appendChild(tile);
+                tile.innerHTML = `
+                    <img src="${book.thumbnail}" class="book-cover">
+                    <p class="book-title">${book.title}</p>
+                `;
+
+                // Dashboard categories
+                if (book.progress === 'reading') document.getElementById('currently-reading')?.appendChild(tile.cloneNode(true));
+                if (book.progress === 'read') document.getElementById('dashboard-read')?.appendChild(tile.cloneNode(true));
+                if (book.progress === 'want') document.getElementById('dashboard-want')?.appendChild(tile.cloneNode(true));
+                if (book.favourite) document.getElementById('dashboard-fav')?.appendChild(tile.cloneNode(true));
+
+                // Always in "All Books"
+                document.getElementById('dashboard-all')?.appendChild(tile);
             });
+        })
+        .catch(err => {
+            console.error("❌ Failed to load dashboard books:", err);
         });
 }
 
@@ -345,7 +391,7 @@ function loadProfile() {
             document.querySelector('.profile-info h2').textContent = profile.name;
             document.querySelector('.profile-bio').textContent = profile.bio;
 
-            const booksThisYear = books.filter(b => b.progress === 'read').length;
+            const booksThisYear = "5";
             const favouriteGenre = "Mystery";
             const moodTracker = "Dynamic Mood";
 

@@ -3,145 +3,163 @@
 // ================================
 const express = require('express');
 const bodyParser = require('body-parser');
-const fs = require('fs');
+const mongoose = require('mongoose');
 const path = require('path');
 
 const app = express();
 const port = 3000;
 
-// Location of the local JSON "database"
-const USERS_FILE = path.join(__dirname, 'users.json');
-
 // Serve static HTML, CSS, JS files
 app.use(express.static(__dirname));
-
-// Parse form submissions (URL encoded) and JSON bodies
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // ================================
-// HELPER FUNCTIONS
+// MONGODB SETUP
 // ================================
+mongoose.connect(
+    'mongodb+srv://dbuser:dbUserPassword@cluster0.aonlnhv.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',
+    { useNewUrlParser: true, useUnifiedTopology: true }
+)
+    .then(() => console.log('MongoDB verbunden'))
+    .catch(err => console.error('MongoDB Fehler:', err));
 
-// Load users from JSON file (create empty if not exists)
-function loadUsers() {
-    if (!fs.existsSync(USERS_FILE)) {
-        fs.writeFileSync(USERS_FILE, '[]');
-    }
-    const data = fs.readFileSync(USERS_FILE);
-    return JSON.parse(data);
-}
+// ================================
+// MONGOOSE SCHEMAS & MODELS
+// ================================
+const bookSchema = new mongoose.Schema({
+    id: String,
+    title: String,
+    author: String,
+    thumbnail: String,
+    progress: {
+        type: String,
+        enum: ['reading', 'read', 'want', 'none'],
+        default: 'none'
+    },
+    mood: String,
+    favourite: { type: Boolean, default: false },
+    tags: [String],
+    rating: Number
+});
 
-// Save updated users back to JSON file
-function saveUsers(users) {
-    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
-}
+const postSchema = new mongoose.Schema({
+    id: String,
+    bookId: String,
+    content: String,
+    photoUrl: String,
+    musicUrl: String,
+    location: String,
+    createdAt: String
+});
+
+const userSchema = new mongoose.Schema({
+    username: String,
+    password: String,
+    email: String,
+    profile: {
+        name: String,
+        bio: String
+    },
+    books: [bookSchema],
+    posts: [postSchema]
+});
+
+const User = mongoose.model('User', userSchema);
 
 // ================================
 // ROUTES
 // ================================
 
-// ----------
-// SIGNUP ROUTE
-// - Adds new user with profile & empty books array
-// ----------
-app.post('/signup', (req, res) => {
+// ---------- SIGNUP ----------
+app.post('/signup', async (req, res) => {
     const { username, password, email, name, bio } = req.body;
 
-    let users = loadUsers();
+    const existingUser = await User.findOne({ username });
+    if (existingUser) return res.send('Username already taken.');
 
-    if (users.some(u => u.username === username)) {
-        return res.send('Username already taken.');
-    }
-
-    const newUser = {
+    const newUser = new User({
         username,
         password,
         email,
-        profile: {
-            name: name || '',
-            bio: bio || ''
-        },
-        books: []
-    };
+        profile: { name: name || '', bio: bio || '' },
+        books: [],
+        posts: []
+    });
 
-    users.push(newUser);
-    saveUsers(users);
-
-    console.log(`New user registered: ${username}`);
+    await newUser.save();
+    console.log(`🟢 New user registered: ${username}`);
     res.redirect('/');
 });
 
-// ----------
-// LOGIN ROUTE
-// - Verifies username & password
-// ----------
-app.post('/login', (req, res) => {
+// ---------- LOGIN ----------
+app.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
-    let users = loadUsers();
-    const user = users.find(u => u.username === username && u.password === password);
-
+    const user = await User.findOne({ username, password });
     if (user) {
-        console.log(`User logged in: ${username}`);
+        console.log(`🔵 User logged in: ${username}`);
         res.redirect('/profile.html');
     } else {
         res.send('Login failed: Invalid username or password.');
     }
 });
 
-// ----------
-// SAVE BOOK ROUTE
-// - Finds existing book by ID and updates its data
-// - If not exists, pushes new
-// ----------
-app.post('/saveBook', (req, res) => {
-    const { username, book } = req.body;
-    let users = loadUsers();
+// ---------- SAVE BOOK ----------
+app.post('/saveBook', async (req, res) => {
+    try {
+        const { username, book } = req.body;
 
-    const user = users.find(u => u.username === username);
-    if (user) {
-        // Try to find existing book by ID
+        const user = await User.findOne({ username });
+        if (!user) return res.status(404).send('User not found.');
+
+        // Fallbacks setzen
+        if (!book.progress) book.progress = 'want'; // Standardmäßig "want to read"
+        if (book.favourite === undefined) book.favourite = false;
+
+        // Thumbnail nachladen, falls nicht vorhanden
+        if (!book.thumbnail) {
+            const fetch = (await import('node-fetch')).default;
+            const googleRes = await fetch(`https://www.googleapis.com/books/v1/volumes/${book.id}`);
+            const googleData = await googleRes.json();
+
+            book.thumbnail = googleData.volumeInfo?.imageLinks?.thumbnail || '';
+        }
+
+        // Prüfen, ob das Buch schon existiert
         const existing = user.books.find(b => b.id === book.id);
+
         if (existing) {
-            // Update all fields
+            // Update bestehendes Buch
             Object.assign(existing, book);
         } else {
+            // Neues Buch hinzufügen
             user.books.push(book);
         }
 
-        saveUsers(users);
-        res.send('Book saved (updated if existed)!');
-    } else {
-        res.send('User not found.');
+        await user.save();
+        res.send('Book saved (with categories & thumbnail)!');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error saving book');
     }
 });
 
-// ----------
-// REMOVE BOOK ROUTE
-// - Deletes a book by ID for given user
-// ----------
-app.post('/removeBook', (req, res) => {
+// ---------- REMOVE BOOK ----------
+app.post('/removeBook', async (req, res) => {
     const { username, bookId } = req.body;
-    let users = loadUsers();
 
-    const user = users.find(u => u.username === username);
-    if (user) {
-        user.books = user.books.filter(b => b.id !== bookId);
-        saveUsers(users);
-        res.send('Book removed!');
-    } else {
-        res.send('User not found.');
-    }
+    const user = await User.findOne({ username });
+    if (!user) return res.send('User not found.');
+
+    user.books = user.books.filter(b => b.id !== bookId);
+    await user.save();
+    res.send('Book removed!');
 });
 
-// ----------
-// GET USER'S SAVED BOOKS
-// ----------
-app.get('/getUserBooks/:username', (req, res) => {
-    const username = req.params.username;
-    const users = loadUsers();
-    const user = users.find(u => u.username === username);
+// ---------- GET USER BOOKS ----------
+app.get('/getUserBooks/:username', async (req, res) => {
+    const user = await User.findOne({ username: req.params.username });
     if (user) {
         res.json(user.books);
     } else {
@@ -149,34 +167,22 @@ app.get('/getUserBooks/:username', (req, res) => {
     }
 });
 
-// ----------
-// GET USER PROFILE INFO
-// ----------
-app.get('/getProfile/:username', (req, res) => {
-    const username = req.params.username;
-    const users = loadUsers();
-    const user = users.find(u => u.username === username);
+// ---------- GET PROFILE ----------
+app.get('/getProfile/:username', async (req, res) => {
+    const user = await User.findOne({ username: req.params.username });
     if (user) {
-        res.json({
-            profile: user.profile,
-            books: user.books
-        });
+        res.json({ profile: user.profile, books: user.books });
     } else {
         res.status(404).json({ error: 'User not found' });
     }
 });
 
-// ==========
-// ADD POST ROUTE
-// ==========
-app.post('/addPost', (req, res) => {
+// ---------- ADD POST ----------
+app.post('/addPost', async (req, res) => {
     const { username, bookId, content, photoUrl, musicUrl, location } = req.body;
 
-    let users = loadUsers();
-    const user = users.find(u => u.username === username);
+    const user = await User.findOne({ username });
     if (!user) return res.send('User not found.');
-
-    if (!user.posts) user.posts = [];
 
     const newPost = {
         id: Date.now().toString(),
@@ -189,46 +195,40 @@ app.post('/addPost', (req, res) => {
     };
 
     user.posts.push(newPost);
-    saveUsers(users);
+    await user.save();
 
-    console.log(`New post for ${username}`);
+    console.log(`🟡 New post for ${username}`);
     res.send('Post added!');
 });
 
-
-// ==========
-// GET POSTS
-// ==========
-app.get('/getPosts/:username', (req, res) => {
-    const username = req.params.username;
-    const users = loadUsers();
-    const user = users.find(u => u.username === username);
-    if (user && user.posts) {
-        res.json(user.posts);
-    } else {
-        res.json([]);
-    }
+// ---------- GET USER POSTS ----------
+app.get('/getPosts/:username', async (req, res) => {
+    const user = await User.findOne({ username: req.params.username });
+    res.json(user && user.posts ? user.posts : []);
 });
 
-// =========
-// GET ALL POSTS (Global Explore)
-// =========
-app.get('/getAllPosts', (req, res) => {
-    const users = loadUsers();
-    let allPosts = [];
-    users.forEach(user => {
-        if (user.posts) {
+// ---------- GET ALL POSTS ----------
+app.get('/getAllPosts', async (req, res) => {
+    try {
+        const users = await User.find({}, { username: 1, posts: 1, _id: 0 });
+        let allPosts = [];
+
+        users.forEach(user => {
             user.posts.forEach(post => {
                 allPosts.push({
-                    username: user.username, // optional, shows who posted
-                    ...post
+                    username: user.username,
+                    ...post.toObject()
                 });
             });
-        }
-    });
-    // Newest first
-    allPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    res.json(allPosts);
+        });
+
+        allPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        res.json(allPosts);
+    } catch (err) {
+        console.error('Error fetching posts:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 });
 
 // ================================
