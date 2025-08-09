@@ -102,28 +102,9 @@
 
 <footer></footer>
 
-<!-- JavaScript -->
-<script src="js/chaptered.js"></script>
-<script>
-  // Toggle post form visibility
-  const toggleBtn = document.getElementById("togglePostForm");
-  const formContainer = document.getElementById("postFormContainer");
-
-  toggleBtn.addEventListener("click", () => {
-    formContainer.classList.toggle("hidden");
-  });
-
-  // Load explore page data
-  if (window.location.pathname.includes('explore')) {
-    const username = localStorage.getItem('username');
-    fetch(`/getUserBooks/${username}`)
-            .then(res => res.json())
-            .then(books => {
-              userBooksCache = books;
-              setupExploreTabs();
-              loadGlobalPosts();
-            });
-  }
-</script>
+<!-- Scripts -->
+<script src="js/common.js"></script>
+<script src="js/explore.js"></script>
+<script src="js/pages.js"></script>
 </body>
 </html>
