@@ -1,29 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Library</title>
-    <!-- ================================
-         - Main CSS and FontAwesome icons
-    =================================== -->
-    <link rel="stylesheet" href="css/chaptered.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <!-- Main CSS + Icons -->
+    <link rel="stylesheet" href="css/chaptered.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
 </head>
 
 <body>
+<header></header>
 
-<header> </header>
 <!-- ================================
-     - Sidebar + Main content area
+     LAYOUT: SIDEBAR + MAIN CONTENT
 =================================== -->
 <div class="layout">
-    <!-- ================================
-         SIDEBAR NAVIGATION
-         - Logo, title, page links
-    =================================== -->
+
+    <!-- ===== SIDEBAR NAVIGATION ===== -->
     <nav class="sidebar">
         <div class="sidebar-header">
-            <img src="images/logo.png" alt="logo" width="100px" height="100px" />
+            <img src="images/logo.png" alt="Chaptered logo" width="100" height="100" />
             <h2>Chaptered</h2>
         </div>
 
@@ -33,36 +30,26 @@
         <a href="profile.html"><i class="fa fa-user"></i> Profile</a>
     </nav>
 
-    <!-- ================================
-         MAIN PAGE CONTENT
-    =================================== -->
+    <!-- ===== MAIN CONTENT AREA ===== -->
     <main class="main-content">
         <div class="dashboard">
 
-            <!-- ================================
-                 LIBRARY HEADER
-            =================================== -->
+            <!-- ===== LIBRARY HEADER ===== -->
             <section class="top-box">
                 <h2>Your Library</h2>
             </section>
 
-            <!-- ================================
-                 SEARCH BAR
-                 - Search books (Google Books API)
-            =================================== -->
+            <!-- ===== SEARCH BAR ===== -->
             <section class="book-search">
                 <div class="search-box">
-                    <input type="text" placeholder="Search books" name="search" id="searchInput">
+                    <input type="text" placeholder="Search books" name="search" id="searchInput" />
                     <button type="button" class="search-button" id="searchButton">
                         <i class="fa fa-search"></i>
                     </button>
                 </div>
             </section>
 
-            <!-- ================================
-                 TAB FILTER BAR
-                 - All / Favourites / Read / Want to Read
-            =================================== -->
+            <!-- ===== TAB FILTER BAR ===== -->
             <div class="tab-bar">
                 <button class="tab active">All</button>
                 <button class="tab">Favourites</button>
@@ -70,21 +57,13 @@
                 <button class="tab">Want to Read</button>
             </div>
 
-            <!-- ================================
-                 SEARCH RESULTS CONTAINER
-                 - Shown when searching
-            =================================== -->
-            <section class="book-category" id="search-results" style="display:none;">
+            <!-- ===== SEARCH RESULTS (hidden by default) ===== -->
+            <section class="book-category hidden" id="search-results">
                 <h2>Search Results</h2>
                 <div class="book-row scrollable-row" id="results-container"></div>
             </section>
 
-            <!-- ================================
-                 USER SHELVES
-                 - Currently Reading / Read / Favourites / Want to Read
-                 - Filled dynamically by JS
-            =================================== -->
-
+            <!-- ===== USER SHELVES (filled dynamically) ===== -->
             <section class="book-category">
                 <h2>Currently Reading</h2>
                 <div class="book-row" id="reading-books"></div>
@@ -107,17 +86,11 @@
 
         </div>
     </main>
-
 </div>
 
-<footer>
-    <!-- Add copyright, links, etc -->
-</footer>
+<footer></footer>
 
-<!-- ================================
-     - JavaScript Code
-=================================== -->
+<!-- JavaScript -->
 <script src="js/chaptered.js"></script>
-
 </body>
 </html>

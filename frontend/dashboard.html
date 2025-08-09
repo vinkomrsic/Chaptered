@@ -3,27 +3,25 @@
 <head>
     <meta charset="UTF-8" />
     <title>Home</title>
-    <!-- ================================
-         - Main CSS and FontAwesome icons
-    =================================== -->
+
+    <!-- Main CSS + Icons -->
     <link rel="stylesheet" href="css/chaptered.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
 </head>
 
 <body>
-<header> </header>
+<header></header>
+
 <!-- ================================
-     - Sidebar + Main content area
+     LAYOUT: SIDEBAR + MAIN CONTENT
 =================================== -->
 <div class="layout">
 
-    <!-- ================================
-         SIDEBAR NAVIGATION
-         - Logo, title, page links
-    =================================== -->
+    <!-- ===== SIDEBAR NAVIGATION ===== -->
     <nav class="sidebar">
         <div class="sidebar-header">
-            <img src="images/logo.png" alt="logo" width="100px" height="100px" />
+            <img src="images/logo.png" alt="Chaptered logo" width="100" height="100" />
             <h2>Chaptered</h2>
         </div>
 
@@ -33,60 +31,44 @@
         <a href="profile.html"><i class="fa fa-user"></i> Profile</a>
     </nav>
 
-    <!-- ================================
-         MAIN PAGE CONTENT
-    =================================== -->
+    <!-- ===== MAIN CONTENT AREA ===== -->
     <main class="main-content">
         <div class="dashboard">
 
-            <!-- ================================
-                 TOP GREETING BOX
-            =================================== -->
+            <!-- ===== TOP GREETING BOX ===== -->
             <section class="top-box">
                 <h2>Welcome Back!</h2>
             </section>
 
-            <!-- ================================
-                 SEARCH BAR
-                 - Search books (Google Books API)
-            =================================== -->
+            <!-- ===== SEARCH BAR ===== -->
             <section class="book-search">
                 <div class="search-box">
-                    <input type="text" placeholder="Search books" name="search" id="dashboard-search" />
+                    <input type="text" placeholder="Search books" id="dashboard-search" />
                     <button type="button" class="search-button">
                         <i class="fa fa-search"></i>
                     </button>
                 </div>
             </section>
 
-            <!-- ================================
-                 READING OVERVIEW
-                 - Currently reading & quick stats
-            =================================== -->
+            <!-- ===== READING OVERVIEW ===== -->
             <div class="reading-overview">
 
-                <!-- Currently Reading Shelf -->
+                <!-- Currently Reading -->
                 <section class="currently-reading-bubble">
                     <h2>Currently Reading</h2>
-                    <div class="book-row scrollable-row" id="currently-reading">
-                    </div>
+                    <div class="book-row scrollable-row" id="currently-reading"></div>
                 </section>
 
-                <!-- Quick Stats Box -->
+                <!-- Quick Stats -->
                 <div class="quick-stats">
-                    <div class="quick-stat">
-                    </div>
+                    <div class="quick-stat"></div>
                 </div>
-
             </div>
 
-            <!-- ================================
-                 BOOK SHELVES NAVIGATION
-                 - Read, Want to Read, Favourites
-            =================================== -->
+            <!-- ===== BOOK SHELVES ===== -->
             <section class="book-shelves">
 
-                <!-- Shelf filter buttons -->
+                <!-- Shelf Filter Buttons -->
                 <div id="shelves">
                     <button type="button" class="shelf-button active" data-target="read">Read</button>
                     <button type="button" class="shelf-button" data-target="want">Want to Read</button>
@@ -95,48 +77,38 @@
 
                 <hr id="book-shelves-hr" />
 
-                <!-- Read Shelf Content -->
+                <!-- Read Shelf -->
                 <div class="shelf-content" id="shelf-read">
                     <section class="book-category">
                         <h2>Read</h2>
-                        <div class="book-row scrollable-row" id="dashboard-read">
-                        </div>
+                        <div class="book-row scrollable-row" id="dashboard-read"></div>
                     </section>
                 </div>
 
-                <!-- Want to Read Shelf Content -->
-                <div class="shelf-content" id="shelf-want" style="display: none;">
+                <!-- Want to Read Shelf -->
+                <div class="shelf-content hidden" id="shelf-want">
                     <section class="book-category">
                         <h2>Want to Read</h2>
-                        <div class="book-row scrollable-row" id="dashboard-want">
-                        </div>
+                        <div class="book-row scrollable-row" id="dashboard-want"></div>
                     </section>
                 </div>
 
-                <!-- Favourites Shelf Content -->
-                <div class="shelf-content" id="shelf-fav" style="display: none;">
+                <!-- Favourites Shelf -->
+                <div class="shelf-content hidden" id="shelf-fav">
                     <section class="book-category">
                         <h2>Favourites</h2>
-                        <div class="book-row scrollable-row" id="dashboard-fav">
-                        </div>
+                        <div class="book-row scrollable-row" id="dashboard-fav"></div>
                     </section>
                 </div>
-
             </section>
 
         </div>
     </main>
 </div>
 
+<footer></footer>
 
-<footer>
-    <!-- Add copyright, links, etc -->
-</footer>
-
-<!-- ================================
-     - JavaScript Code
-=================================== -->
+<!-- JavaScript -->
 <script src="js/chaptered.js"></script>
-
 </body>
 </html>

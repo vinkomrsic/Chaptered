@@ -1,29 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Profile</title>
-  <!-- ================================
-       - Main CSS and FontAwesome icons
-  =================================== -->
-  <link rel="stylesheet" href="css/chaptered.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <!-- Main CSS + Icons -->
+  <link rel="stylesheet" href="css/chaptered.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
 </head>
 
 <body>
+<header></header>
 
-<header> </header>
 <!-- ================================
-     - Sidebar + Main content area
+     LAYOUT: SIDEBAR + MAIN CONTENT
 =================================== -->
 <div class="layout">
-  <!-- ================================
-       SIDEBAR NAVIGATION
-       - Logo, title, page links
-  =================================== -->
+
+  <!-- ===== SIDEBAR NAVIGATION ===== -->
   <nav class="sidebar">
     <div class="sidebar-header">
-      <img src="images/logo.png" alt="logo" width="100px" height="100px" />
+      <img src="images/logo.png" alt="Chaptered logo" width="100" height="100" />
       <h2>Chaptered</h2>
     </div>
 
@@ -33,52 +30,49 @@
     <a href="#" class="active"><i class="fa fa-user"></i> Profile</a>
   </nav>
 
-  <!-- ================================
-       MAIN PAGE CONTENT
-  =================================== -->
+  <!-- ===== MAIN CONTENT AREA ===== -->
   <main class="main-content">
     <div class="dashboard">
-      <!-- ================================
-           PROFILE OVERVIEW
-           - Avatar, name, bio, quick stats
-      =================================== -->
+
+      <!-- ===== PROFILE OVERVIEW ===== -->
       <section class="profile-overview">
+        <!-- Profile card -->
         <div class="profile-card">
-          <img src="profilepic.jpg" class="profile-avatar" alt="Profile">
+          <img src="profilepic.jpg" class="profile-avatar" alt="Profile" />
           <div class="profile-info">
             <h2>Vinko Mrsic</h2>
             <p class="profile-bio">Reading to reflect, not just to escape.</p>
+
+            <!-- Logout button placed under profile info -->
+            <button id="logoutBtn" class="logout-button">
+              <i class="fa fa-sign-out"></i> Logout
+            </button>
           </div>
         </div>
 
+        <!-- Quick stats -->
         <div class="quick-stats">
           <div class="quick-stat">
+            <!-- filled dynamically -->
           </div>
         </div>
       </section>
 
-      <!-- ================================
-           FAVOURITE BOOKS
-      =================================== -->
+      <!-- ===== FAVOURITE BOOKS ===== -->
       <section class="book-category">
         <h2>Favourite Books</h2>
         <div class="book-row">
+          <!-- filled dynamically -->
         </div>
       </section>
 
     </div>
   </main>
-
 </div>
 
-<footer>
-  <!-- Add copyright, links, etc -->
-</footer>
+<footer></footer>
 
-<!-- ================================
-     - JavaScript Code
-=================================== -->
+<!-- JavaScript -->
 <script src="js/chaptered.js"></script>
-
 </body>
 </html>

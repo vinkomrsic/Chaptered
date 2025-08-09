@@ -1,171 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Explore</title>
-  <link rel="stylesheet" href="css/chaptered.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <style>
-    .reflection-box {
-      background-color: #fffaf6;
-      border-radius: 12px;
-      padding: 1rem;
-      margin-bottom: 2rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    }
 
-    .create-post-button {
-      background-color: #e6a57e;
-      color: white;
-      border: none;
-      padding: 0.75rem 1.5rem;
-      font-weight: bold;
-      font-size: 1rem;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-bottom: 1rem;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      transition: background-color 0.3s;
-    }
-
-    .create-post-button:hover {
-      background-color: #d89268;
-    }
-
-    .post-form-container {
-      background-color: #fffefc;
-      padding: 1.5rem;
-      border-radius: 10px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.1);
-    }
-
-    .post-form-container.hidden {
-      display: none;
-    }
-
-    .post-form-container input,
-    .post-form-container textarea {
-      width: 100%;
-      padding: 0.5rem;
-      margin-bottom: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-
-    .post-form-container button {
-      background-color: #e6a57e;
-      color: white;
-      padding: 0.6rem 1.2rem;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    .explore-header {
-      margin-top: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    .explore-tab {
-      padding: 0.5rem 1rem;
-      border: none;
-      border-radius: 6px;
-      margin-right: 0.5rem;
-      cursor: pointer;
-    }
-
-    .explore-tab.active {
-      background-color: #2e3a59;
-      color: white;
-    }
-
-    .book-selector {
-      background-color: #fef4e8;
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
-      cursor: pointer;
-      display: inline-block;
-      margin-bottom: 1rem;
-    }
-
-    /* Book Picker Modal */
-    .book-picker-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.5);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-    }
-
-    .book-picker-content {
-      background: white;
-      padding: 2rem;
-      border-radius: 10px;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-  </style>
+  <!-- Main CSS + Icons -->
+  <link rel="stylesheet" href="css/chaptered.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
 </head>
 
 <body>
 <header></header>
 
+<!-- ================================
+     LAYOUT: SIDEBAR + MAIN CONTENT
+=================================== -->
 <div class="layout">
+
+  <!-- ===== SIDEBAR NAVIGATION ===== -->
   <nav class="sidebar">
     <div class="sidebar-header">
-      <img src="images/logo.png" alt="logo" width="100px" height="100px" />
+      <img src="images/logo.png" alt="Chaptered logo" width="100" height="100" />
       <h2>Chaptered</h2>
     </div>
 
     <a href="dashboard.html"><i class="fa fa-home"></i> Home</a>
     <a href="library.html"><i class="fa fa-book"></i> Library</a>
-    <a href="explore.html" class="active"><i class="fa fa-compass"></i> Explore</a>
+    <a href="#" class="active"><i class="fa fa-compass"></i> Explore</a>
     <a href="profile.html"><i class="fa fa-user"></i> Profile</a>
   </nav>
 
+  <!-- ===== MAIN CONTENT AREA ===== -->
   <main class="main-content">
     <div class="dashboard">
+
+      <!-- ===== PAGE HEADER ===== -->
       <section class="top-box">
         <h2>Explore Page</h2>
       </section>
 
-      <!-- Create Post Button + Form -->
+      <!-- ===== CREATE POST BUTTON + FORM ===== -->
       <section class="reflection-box">
+        <!-- Toggle button -->
         <button id="togglePostForm" class="create-post-button">
           <i class="fa fa-plus"></i> Create a New Post
         </button>
 
+        <!-- Hidden form -->
         <div id="postFormContainer" class="post-form-container hidden">
+          <!-- Book selector -->
           <label>Attach Book (optional):</label>
           <div class="book-selector" onclick="openBookPicker()">
             <span id="selectedBookTitle">Click to select a book</span>
-            <img id="selectedBookCover" alt="Book cover" style="display:none; width: 60px; height: auto; margin-left: 1rem;">
+            <img id="selectedBookCover" alt="Book cover"
+                 style="display:none; width: 60px; height: auto; margin-left: 1rem;" />
           </div>
-          <input type="hidden" id="postBook">
+          <input type="hidden" id="postBook" />
 
+          <!-- Optional fields -->
           <label for="postPhoto">Photo URL (optional):</label>
-          <input id="postPhoto" placeholder="https://...">
+          <input id="postPhoto" placeholder="https://..." />
 
           <label for="postMusic">Music URL (optional):</label>
-          <input id="postMusic" placeholder="Spotify or YouTube URL">
+          <input id="postMusic" placeholder="Spotify or YouTube URL" />
 
           <label for="postLocation">Location (optional):</label>
-          <input id="postLocation" placeholder="Where did you read?">
+          <input id="postLocation" placeholder="Where did you read?" />
 
+          <!-- Main content -->
           <label for="postContent">Your Thoughts:</label>
           <textarea id="postContent" placeholder="Write your thoughts..." rows="4"></textarea>
 
+          <!-- Submit -->
           <button onclick="addPost()">Post</button>
         </div>
       </section>
 
-      <!-- Tabs for Posts -->
+      <!-- ===== TAB BAR FOR POSTS ===== -->
       <section class="explore-header">
         <div>
           <button class="explore-tab active" data-mode="global">Global Posts</button>
@@ -173,12 +84,14 @@
         </div>
       </section>
 
-      <!-- Post Container -->
+      <!-- ===== POSTS CONTAINER ===== -->
       <section id="explore-posts"></section>
+
     </div>
   </main>
 </div>
 
+<!-- ===== BOOK PICKER MODAL ===== -->
 <div id="bookPickerModal" class="book-picker-modal">
   <div class="book-picker-content">
     <h3>Select a Book</h3>
@@ -189,6 +102,7 @@
 
 <footer></footer>
 
+<!-- JavaScript -->
 <script src="js/chaptered.js"></script>
 <script>
   // Toggle post form visibility

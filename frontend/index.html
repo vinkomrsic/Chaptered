@@ -3,90 +3,14 @@
 <head>
     <meta charset="UTF-8" />
     <title>Login - Chaptered</title>
-    <!-- ================================
-         - Main CSS and FontAwesome icons
-    =================================== -->
+
+    <!-- Main CSS + Icons -->
     <link rel="stylesheet" href="css/chaptered.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
-
-    <style>
-        /* ================================
-             LOGIN PAGE STYLES
-             - Centered form box and fields
-        =================================== */
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f8f6f3;
-            margin: 0;
-            font-family: sans-serif;
-        }
-
-        .login-box {
-            background: #ffffff;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-
-        .login-box h1 {
-            margin-bottom: 1rem;
-            color: #2e3a59;
-        }
-
-        .login-box input {
-            width: 100%;
-            padding: 0.75rem;
-            margin: 0.5rem 0;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            box-sizing: border-box;
-        }
-
-        .password-wrapper {
-            position: relative;
-        }
-
-        .password-wrapper input {
-            padding-right: 2.5rem; /* space for eye icon */
-        }
-
-        .password-wrapper button {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            border: none;
-            background: none;
-            cursor: pointer;
-            color: #6d6d6d;
-            font-size: 1rem;
-        }
-
-        .login-box button[type="submit"] {
-            width: 100%;
-            padding: 0.75rem;
-            background-color: #e6a57e;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 1rem;
-        }
-
-        .login-box button[type="submit"]:hover {
-            background-color: #d8926d;
-        }
-    </style>
 </head>
 
-<body>
+<body class="login-body">
+
 <!-- ================================
      LOGIN FORM CONTAINER
 =================================== -->
@@ -98,31 +22,28 @@
 
         <div class="password-wrapper">
             <input type="password" id="password" name="password" placeholder="Password" required />
-            <button type="button" onclick="togglePassword()">
+            <button type="button" onclick="togglePassword()" aria-label="Show or hide password">
                 <i id="eyeIcon" class="fa fa-eye"></i>
             </button>
         </div>
 
         <button type="submit">Log In</button>
 
-        <p style="margin-top: 1rem;">
+        <p class="signup-text">
             Don't have an account? <a href="signup.html">Sign Up</a>
         </p>
-
     </form>
 </div>
 
-<!-- ================================
-     INLINE JS LOGIC
-     - Save username in local storage when logging in
-=================================== -->
+<!-- Save username in local storage -->
 <script>
     const loginForm = document.querySelector('form');
-    loginForm.addEventListener('submit', function(e) {
+    loginForm.addEventListener('submit', function() {
         const usernameInput = loginForm.querySelector('input[name="username"]');
         localStorage.setItem('username', usernameInput.value);
     });
 </script>
-<script src="js/chaptered.js"> </script>
+
+<script src="js/chaptered.js"></script>
 </body>
 </html>

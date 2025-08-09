@@ -1,121 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Book Details</title>
-    <!-- ================================
-       - Main CSS and FontAwesome icons
-  =================================== -->
-    <link rel="stylesheet" href="css/chaptered.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <style>
-        /* Back button + page layout for book detail */
-        .page-header {
-            padding: 2rem;
-            padding-bottom: 0;
-        }
 
-        .back-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.6rem 1rem;
-            border-radius: 8px;
-            background-color: #2e3a59;
-            color: #fffaf5;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 0.95rem;
-            transition: background-color 0.2s;
-        }
-
-        .back-button:hover {
-            background-color: #3b4a65;
-        }
-
-        .back-button::before {
-            content: "\2190";
-            font-size: 1.1rem;
-        }
-
-        .book-detail-container {
-            display: flex;
-            flex-direction: row;
-            gap: 2rem;
-            align-items: flex-start;
-            flex-wrap: wrap;
-            padding: 0 2rem 2rem;
-        }
-
-        .left-column {
-            flex: 1;
-            min-width: 280px;
-        }
-
-        .right-column {
-            flex: 1;
-            min-width: 280px;
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-        }
-
-        .book-info {
-            background-color: #fffaf5;
-            padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        }
-
-        .book-detail img {
-            width: 140px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            margin-top: 1rem;
-        }
-
-        .book-state {
-            padding: 1.5rem;
-            background-color: #fffaf5;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        }
-
-        .book-state label {
-            display: block;
-            margin: 0.75rem 0 0.25rem;
-            font-weight: bold;
-        }
-
-        .book-state input,
-        .book-state select {
-            width: 100%;
-            padding: 0.5rem;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            font-size: 1rem;
-            background-color: #fefefe;
-        }
-
-        .book-state button {
-            margin-top: 1rem;
-            background-color: #e6a57e;
-            color: #2e3a59;
-            border: none;
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .book-state button:hover {
-            background-color: #f3b88f;
-        }
-    </style>
+    <!-- Main CSS + Icons -->
+    <link rel="stylesheet" href="css/chaptered.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
 </head>
 
 <body>
+
 <!-- ================================
      BACK TO LIBRARY LINK
 =================================== -->
@@ -131,18 +26,18 @@
 <div class="dashboard">
     <div class="book-detail-container">
 
-        <!-- Book Info (Title, Author, Description) -->
+        <!-- Left: Book Info (Title, Author, Description, Cover) -->
         <div class="left-column">
             <section class="book-info book-detail" id="book-detail">
                 <h2>Loading book...</h2>
             </section>
         </div>
 
-        <!-- Extra Info + Save State Box -->
+        <!-- Right: Extra Info + Save/Remove + Favourite -->
         <div class="right-column">
 
             <section class="book-info extra-book-data" id="extra-info">
-                <!-- Populated dynamically with js -->
+                <!-- Populated dynamically with JS -->
             </section>
 
             <section class="book-state">
@@ -155,7 +50,7 @@
                 </select>
 
                 <label for="mood">Mood:</label>
-                <input type="text" id="mood" placeholder="e.g. Inspired, Curious">
+                <input type="text" id="mood" placeholder="e.g. Inspired, Curious" />
 
                 <button id="saveRemoveButton" onclick="toggleSaveRemove()">Save</button>
                 <button id="favButton" onclick="toggleFavourite()">
@@ -167,16 +62,11 @@
     </div>
 </div>
 
+<!-- ================================
+     BOOK DETAIL PAGE SCRIPT (unchanged)
+=================================== -->
 <script>
-    // ================================
     // BOOK DETAIL PAGE SCRIPT
-    // -------------------------------
-    // 1) Fetch & display book info
-    // 2) Restore saved data (progress, mood, favourite)
-    // 3) Save OR remove book on toggle
-    // 4) Toggle favourite (star icon)
-    // ================================
-
     const params = new URLSearchParams(window.location.search);
     const bookId = params.get("id");
     let savedTitle = "";
@@ -184,7 +74,6 @@
     let isSaved = false;
     let currentFavourite = false;
 
-    // Load book data + check save status
     if (bookId) {
         fetch(`https://www.googleapis.com/books/v1/volumes/${bookId}`)
             .then(res => res.json())
@@ -198,7 +87,7 @@
           <p><strong>Author:</strong> ${info.authors?.join(", ") || "Unknown"}</p>
           <p><strong>Published:</strong> ${info.publishedDate || "N/A"}</p>
           <p><strong>Description:</strong> ${info.description || "No description available."}</p>
-          <img src="${savedThumbnail}" class="book-cover">
+          <img src="${savedThumbnail}" class="book-cover" alt="Book cover of ${savedTitle}">
         `;
 
                 document.getElementById("extra-info").innerHTML = `
@@ -214,7 +103,6 @@
             });
     }
 
-    // Check server if book is already saved → update button + restore local values
     function checkIfSaved() {
         const username = localStorage.getItem('username');
         fetch(`/getUserBooks/${username}`)
@@ -234,26 +122,22 @@
             });
     }
 
-    // Toggle save/remove
     function toggleSaveRemove() {
         const username = localStorage.getItem('username');
         const progress = document.getElementById("progress").value;
         const mood = document.getElementById("mood").value;
 
         if (isSaved) {
-            // Remove
             fetch('/removeBook', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ username, bookId })
-            })
-                .then(() => {
-                    isSaved = false;
-                    updateSaveRemoveButton();
-                    alert("Book removed from your library!");
-                });
+            }).then(() => {
+                isSaved = false;
+                updateSaveRemoveButton();
+                alert("Book removed from your library!");
+            });
         } else {
-            // Save
             fetch('/saveBook', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -268,24 +152,18 @@
                         favourite: currentFavourite
                     }
                 })
-            })
-                .then(() => {
-                    isSaved = true;
-                    updateSaveRemoveButton();
-                    alert("Book saved to your library!");
-                });
+            }).then(() => {
+                isSaved = true;
+                updateSaveRemoveButton();
+                alert("Book saved to your library!");
+            });
         }
     }
 
-    // Toggle favourite star and re-save
     function toggleFavourite() {
-        // 1) Flip the flag immediately
         currentFavourite = !currentFavourite;
-
-        // 2) Always update the icon immediately
         updateFavIcon();
 
-        // 3) If the book is saved, send an update to server
         const username = localStorage.getItem('username');
         if (isSaved) {
             const progress = document.getElementById("progress").value;
@@ -305,18 +183,9 @@
                         favourite: currentFavourite
                     }
                 })
-            })
-                .then(res => res.text())
-                .then(msg => {
-                    console.log(msg);
-                })
-                .catch(err => {
-                    console.error(err);
-                    alert("Failed to update favourite on server.");
-                });
-
+            }).then(r => r.text()).then(console.log)
+                .catch(() => alert("Failed to update favourite on server."));
         } else {
-            // Not saved yet — inform user clearly
             alert("Please save this book first to mark it as favourite.");
         }
     }
