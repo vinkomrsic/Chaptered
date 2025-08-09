@@ -451,48 +451,66 @@ function loadMyPosts() {
         .then(posts => renderExplorePosts(posts));
 }
 
-function renderExplorePosts(posts) {
+async function renderExplorePosts(posts) {
     const container = document.getElementById('explore-posts');
     if (!container) return;
     container.innerHTML = '';
 
-    if (posts.length === 0) {
+    if (!posts || posts.length === 0) {
         container.innerHTML = '<p>No posts yet.</p>';
         return;
     }
 
-    posts.forEach(post => {
-        const div = document.createElement('div');
-        div.className = 'post';
-
-        // ✅ If post has bookId, show TITLE + COVER from cache
+    for (const post of posts) {
         let bookHtml = '';
+
         if (post.bookId) {
-            const match = userBooksCache.find(b => b.id === post.bookId);
-            if (match) {
+            // 1) Prefer the denormalized fields stored on the post
+            let title = post.bookTitle || null;
+            let thumb = post.bookThumbnail || null;
+
+            // 2) Fallback to the viewer's cache (if they happen to have the book)
+            if ((!title || !thumb) && Array.isArray(userBooksCache)) {
+                const match = userBooksCache.find(b => b.id === post.bookId);
+                if (match) {
+                    title = title || match.title;
+                    thumb = thumb || match.thumbnail;
+                }
+            }
+
+            // Final fallback: show the raw id
+            if (title || thumb) {
                 bookHtml = `
-                    <div class="post-book-info">
-                        <img src="${match.thumbnail}" width="40" style="vertical-align:middle;">
-                        <span>${match.title}</span>
-                    </div>
-                `;
+          <div class="post-book-info" style="display:flex;align-items:center;gap:.5rem;margin:.25rem 0;">
+            ${thumb ? `<img src="${thumb}" alt="Book cover" width="40" height="60" style="object-fit:cover;border-radius:4px;">` : ''}
+            <span>${title || ''}</span>
+          </div>
+        `;
             } else {
                 bookHtml = `<strong>📖 Book:</strong> ${post.bookId}<br>`;
             }
         }
 
+        const div = document.createElement('div');
+        div.className = 'post';
         div.innerHTML = `
-            <strong>${post.username ? post.username : 'You'}</strong><br>
-            ${bookHtml}
-            <p>${post.content}</p>
-            ${post.photoUrl ? `<img src="${post.photoUrl}" style="max-width:200px;"><br>` : ''}
-            ${post.musicUrl ? `<a href="${post.musicUrl}" target="_blank">🎵 Listen</a><br>` : ''}
-            ${post.location ? `<small>📍 ${post.location}</small><br>` : ''}
-            <small>${new Date(post.createdAt).toLocaleString()}</small>
-        `;
+      <strong>${post.username ? post.username : 'You'}</strong><br>
+      ${bookHtml}
+      <p>${post.content || ''}</p>
+      ${post.photoUrl ? `<img src="${post.photoUrl}" style="max-width:200px;border-radius:6px;"><br>` : ''}
+      ${post.musicUrl ? `<a href="${post.musicUrl}" target="_blank" rel="noopener">🎵 Listen</a><br>` : ''}
+      ${post.location ? `<small>📍 ${post.location}</small><br>` : ''}
+      <small>${new Date(post.createdAt).toLocaleString()}</small>
+    `;
+
+        // Optional: clicking the book area opens the book page
+        if (post.bookId && div.querySelector('.post-book-info')) {
+            div.querySelector('.post-book-info').style.cursor = 'pointer';
+            div.querySelector('.post-book-info').addEventListener('click', () => openBookDetail(post.bookId));
+        }
 
         container.appendChild(div);
-    });
+    }
 }
 
 // ==============================

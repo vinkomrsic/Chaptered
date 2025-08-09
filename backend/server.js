@@ -46,11 +46,13 @@ const bookSchema = new mongoose.Schema({
 const postSchema = new mongoose.Schema({
     id: String,
     bookId: String,
+    bookTitle: String,
+    bookThumbnail: String,
     content: String,
     photoUrl: String,
     musicUrl: String,
     location: String,
-    createdAt: String
+    createdAt: { type: Date, default: Date.now }
 });
 
 const userSchema = new mongoose.Schema({
@@ -179,26 +181,59 @@ app.get('/getProfile/:username', async (req, res) => {
 
 // ---------- ADD POST ----------
 app.post('/addPost', async (req, res) => {
-    const { username, bookId, content, photoUrl, musicUrl, location } = req.body;
+    try {
+        const { username, bookId, bookTitle, bookThumbnail, content, photoUrl, musicUrl, location } = req.body;
 
-    const user = await User.findOne({ username });
-    if (!user) return res.send('User not found.');
+        const user = await User.findOne({ username });
+        if (!user) return res.status(404).send('User not found.');
 
-    const newPost = {
-        id: Date.now().toString(),
-        bookId: bookId || null,
-        content,
-        photoUrl: photoUrl || null,
-        musicUrl: musicUrl || null,
-        location: location || null,
-        createdAt: new Date().toISOString()
-    };
+        let title = bookTitle || null;
+        let thumb = bookThumbnail || null;
 
-    user.posts.push(newPost);
-    await user.save();
+        // Try user library first
+        if (bookId && (!title || !thumb)) {
+            const inLib = user.books.find(b => b.id === bookId);
+            if (inLib) {
+                title = title || inLib.title || null;
+                thumb = thumb || inLib.thumbnail || null;
+            }
+        }
 
-    console.log(`🟡 New post for ${username}`);
-    res.send('Post added!');
+        // Fall back to Google Books
+        if (bookId && (!title || !thumb)) {
+            try {
+                const fetch = (await import('node-fetch')).default;
+                const r = await fetch(`https://www.googleapis.com/books/v1/volumes/${encodeURIComponent(bookId)}`);
+                if (r.ok) {
+                    const j = await r.json();
+                    const info = j?.volumeInfo || {};
+                    title = title || info.title || null;
+                    thumb = thumb || info.imageLinks?.thumbnail || null;
+                }
+            } catch (_) { /* ignore network errors here */ }
+        }
+
+        const newPost = {
+            id: Date.now().toString(),
+            bookId: bookId || null,
+            bookTitle: title,                 // NEW
+            bookThumbnail: thumb,             // NEW
+            content,
+            photoUrl: photoUrl || null,
+            musicUrl: musicUrl || null,
+            location: location || null,
+            createdAt: new Date()
+        };
+
+        user.posts.push(newPost);
+        await user.save();
+
+        console.log(`🟡 New post for ${username}`);
+        res.send('Post added!');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error adding post');
+    }
 });
 
 // ---------- GET USER POSTS ----------
@@ -211,19 +246,16 @@ app.get('/getPosts/:username', async (req, res) => {
 app.get('/getAllPosts', async (req, res) => {
     try {
         const users = await User.find({}, { username: 1, posts: 1, _id: 0 });
-        let allPosts = [];
+        const allPosts = [];
 
         users.forEach(user => {
-            user.posts.forEach(post => {
-                allPosts.push({
-                    username: user.username,
-                    ...post.toObject()
-                });
+            (user.posts || []).forEach(post => {
+                const base = typeof post.toObject === 'function' ? post.toObject() : post;
+                allPosts.push({ username: user.username, ...base });
             });
         });
 
         allPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
         res.json(allPosts);
     } catch (err) {
         console.error('Error fetching posts:', err);
