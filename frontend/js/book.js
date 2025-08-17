@@ -146,3 +146,96 @@ function updateFavIcon() {
     const icon = document.getElementById('favIcon');
     if (icon) icon.className = currentFavourite ? 'fa fa-star' : 'fa fa-star-o';
 }
+
+// ==============================
+// BOOK DETAILS – MOOD PICKER bridge (ADD-ONLY)
+// Keeps your existing #mood value flow intact.
+// ==============================
+
+function resolveCurrentBookId() {
+    try {
+        const url = new URL(window.location.href);
+        const byId = url.searchParams.get('id') || url.searchParams.get('bookId');
+        if (byId) return byId;
+    } catch (_) {}
+    if (window.currentBookId) return String(window.currentBookId);
+    const detail = document.getElementById('book-detail');
+    if (detail && detail.dataset && detail.dataset.bookId) return detail.dataset.bookId;
+    return null;
+}
+
+async function postBookMood(bookId, mood) {
+    const username = localStorage.getItem('username');
+    if (!username) { alert('You must be logged in to set a mood.'); return; }
+    try {
+        const res = await fetch(`/books/${encodeURIComponent(bookId)}/mood`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, mood })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
+        console.log('✅ Mood saved:', data);
+    } catch (err) {
+        console.error('❌ Failed to save mood:', err);
+        alert('Failed to save mood for this book.');
+    }
+}
+
+function setPickerActive(picker, moodValue) {
+    picker.querySelectorAll('button').forEach(b => {
+        const isActive = (b.dataset.mood === moodValue);
+        b.classList.toggle('active', isActive);
+        b.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
+}
+
+function setupMoodPicker() {
+    const picker = document.getElementById('mood-picker');
+    const hidden = document.getElementById('mood'); // compatibility input
+    if (!picker || !hidden) return;
+
+    picker.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            // clear active
+            picker.querySelectorAll('button').forEach(b => {
+                b.classList.remove('active');
+                b.setAttribute('aria-pressed', 'false'); // accessibility reset
+            });
+            // set active
+            btn.classList.add('active');
+            btn.setAttribute('aria-pressed', 'true'); // accessibility feedback
+
+            const moodValue = btn.dataset.mood;
+            hidden.value = moodValue; // keep your existing save/remove flow intact
+
+            // If book isn't saved yet, don't call the backend — just store & highlight.
+            // Uses your existing top-level `isSaved` flag.
+            if (!window.isSaved && typeof isSaved !== 'undefined' && !isSaved) {
+                console.log('Mood set locally (book not saved yet). Will be saved with /saveBook.');
+                return;
+            }
+
+            // Book is already saved -> send to backend immediately
+            const bookId = resolveCurrentBookId();
+            if (!bookId) { console.warn('No bookId found for mood update.'); return; }
+            await postBookMood(bookId, moodValue);
+        });
+    });
+
+    // Initial sync from hidden (set by checkIfSaved()) so the correct button shows active
+    const trySyncFromHidden = () => {
+        const v = (hidden.value || '').trim();
+        if (!v) return;
+        picker.querySelectorAll('button').forEach(b => {
+            const active = b.dataset.mood === v;
+            b.classList.toggle('active', active);
+            b.setAttribute('aria-pressed', active ? 'true' : 'false');
+        });
+    };
+    trySyncFromHidden();
+    setTimeout(trySyncFromHidden, 400);
+    setTimeout(trySyncFromHidden, 1000);
+}
+
+document.addEventListener('DOMContentLoaded', setupMoodPicker);

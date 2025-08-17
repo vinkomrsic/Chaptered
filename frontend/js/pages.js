@@ -20,6 +20,11 @@ document.addEventListener("DOMContentLoaded", () => {
         loadProfile();
     }
 
+    // If a stats box exists on the page, fetch real stats
+    if (document.querySelector('.quick-stat')) {
+        fetchAndRenderStats();
+    }
+
     // Explore + Book pages now self-initialize in their own files
 });
 
@@ -155,7 +160,7 @@ function loadSavedBooks() {
 }
 
 // ==============================
-// DASHBOARD – LOAD BOOKS & STATS
+// DASHBOARD – LOAD BOOKS
 // ==============================
 function loadDashboardBooks() {
     const username = localStorage.getItem('username');
@@ -166,22 +171,12 @@ function loadDashboardBooks() {
         if (el) el.innerHTML = '';
     });
 
+    // Load real stats immediately
+    fetchAndRenderStats();
+
     fetch(`/getUserBooks/${username}`)
         .then(res => res.json())
         .then(books => {
-            const booksThisYear = books.filter(b => b.progress === 'read').length;
-            const favouriteGenre = books.length > 0 ? "TBD Genre" : "—";
-            const moodTracker = "Coming Soon";
-
-            const statBox = document.querySelector('.quick-stat');
-            if (statBox) {
-                statBox.innerHTML = `
-          <p><i class="fa fa-calendar"></i> Books This Year <span>${booksThisYear}</span></p>
-          <p><i class="fa fa-book"></i> Favorite Genre <span>${favouriteGenre}</span></p>
-          <p><i class="fa fa-comment"></i> Mood Tracker <span>${moodTracker}</span></p>
-        `;
-            }
-
             if (!books || books.length === 0) {
                 const all = document.getElementById('dashboard-all');
                 if (all) all.innerHTML = `<p>No books yet. Start reading!</p>`;
@@ -245,6 +240,9 @@ function loadProfile() {
     const username = localStorage.getItem('username');
     if (!username) return;
 
+    // Load real stats immediately
+    fetchAndRenderStats();
+
     fetch(`/getProfile/${username}`)
         .then(res => res.json())
         .then(data => {
@@ -253,19 +251,6 @@ function loadProfile() {
 
             document.querySelector('.profile-info h2').textContent = profile.name;
             document.querySelector('.profile-bio').textContent = profile.bio;
-
-            const booksThisYear = "5";
-            const favouriteGenre = "Mystery";
-            const moodTracker = "Dynamic Mood";
-
-            const statBox = document.querySelector('.quick-stat');
-            if (statBox) {
-                statBox.innerHTML = `
-          <p><i class="fa fa-calendar"></i> Books This Year <span>${booksThisYear}</span></p>
-          <p><i class="fa fa-book"></i> Favorite Genre <span>${favouriteGenre}</span></p>
-          <p><i class="fa fa-comment"></i> Mood Tracker <span>${moodTracker}</span></p>
-        `;
-            }
 
             const favBooks = books.filter(b => b.favourite);
             const favContainer = document.querySelector('.book-category .book-row');
@@ -279,7 +264,8 @@ function loadProfile() {
                     favContainer.appendChild(tile);
                 });
             }
-        });
+        })
+        .catch(err => console.error('❌ Failed to load profile:', err));
 }
 
 // ==============================
@@ -294,3 +280,64 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+
+// ==============================
+// DASHBOARD & PROFILE — LIVE STATS (robust)
+// ==============================
+async function fetchAndRenderStats() {
+    const statBox = document.querySelector('.quick-stat');
+    const username = localStorage.getItem('username');
+
+    if (!statBox) {
+        console.warn('[stats] No .quick-stat element on this page.');
+        return;
+    }
+    if (!username) {
+        console.warn('[stats] No username in localStorage. Are you logged in on this page?');
+        statBox.innerHTML = `
+          <p><i class="fa fa-calendar"></i> Books This Year <span>—</span></p>
+          <p><i class="fa fa-book"></i> Favorite Genre <span>—</span></p>
+          <p><i class="fa fa-comment"></i> Mood Tracker <span>— (login required)</span></p>
+        `;
+        return;
+    }
+
+    try {
+        const res = await fetch(`/stats/${encodeURIComponent(username)}`);
+        if (!res.ok) {
+            console.error('[stats] HTTP error', res.status);
+            throw new Error(`HTTP ${res.status}`);
+        }
+        const stats = await res.json();
+        console.debug('📊 /stats response', stats);
+        renderQuickStatBox(stats);
+    } catch (err) {
+        console.error('❌ Failed to load stats:', err);
+        statBox.innerHTML = `
+          <p><i class="fa fa-calendar"></i> Books This Year <span>—</span></p>
+          <p><i class="fa fa-book"></i> Favorite Genre <span>—</span></p>
+          <p><i class="fa fa-comment"></i> Mood Tracker <span>— (failed to load)</span></p>
+        `;
+    }
+}
+
+function renderQuickStatBox(stats) {
+    const statBox = document.querySelector('.quick-stat');
+    if (!statBox) return;
+
+    const booksThisYear  = typeof stats.booksThisYear === 'number' ? stats.booksThisYear : '—';
+
+    // Prefer profile tracker; fall back to average from last 30d (server-provided fields)
+    const moodTrackerPrimary = (stats.moodTracker && stats.moodTracker !== '—')
+        ? stats.moodTracker
+        : (stats.avgMood30dLabel || '—');
+
+    const avg30Label = stats.avgMood30dLabel || '—';
+    const avg30Score = (typeof stats.avgMood30dScore === 'number') ? `${stats.avgMood30dScore}/5` : '—';
+
+    statBox.innerHTML = `
+      <p><i class="fa fa-calendar"></i> Books This Year <span>${booksThisYear}</span></p>
+      <p><i class="fa fa-comment"></i> Mood Tracker <span>${moodTrackerPrimary}</span></p>
+      <p><i class="fa fa-smile-o"></i> Avg Mood (30d) <span>${avg30Label} • ${avg30Score}</span></p>
+    `;
+}

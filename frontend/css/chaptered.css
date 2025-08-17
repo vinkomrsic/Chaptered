@@ -609,6 +609,49 @@ body{
 
 .signup-text{ margin-top: 1rem; }
 
+/* =========== Mood Picker =========== */
+.mood-picker{
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin: .5rem 0 .75rem;
+}
+
+.mood-picker button{
+    appearance: none;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--text);
+    padding: .35rem .55rem;
+    font-size: 1.15rem;     /* emoji size */
+    line-height: 1;
+    border-radius: var(--radius);
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: background-color .2s ease, border-color .2s ease, transform .07s ease;
+}
+
+.mood-picker button:hover{
+    background: #fef4e8;    /* highlight box tone */
+}
+
+.mood-picker button.active{
+    background: var(--accent);
+    color: var(--accent-strong);
+    border-color: var(--accent);
+    transform: translateY(-1px);
+}
+
+.mood-picker button:focus{
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.book-state .mood-picker button{
+    font-size: 1.05rem;
+    padding: .3rem .5rem;
+}
+
 /* =========== Accessibility =========== */
 .sidebar a:focus,
 .shelf-button:focus,

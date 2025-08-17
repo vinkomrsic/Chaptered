@@ -11,15 +11,11 @@ const port = 3000; // Server port (TODO: move to process.env.PORT for deploy)
 
 // Serve static HTML, CSS, JS files from the project root
 app.use(express.static(__dirname));
-// Parse URL-encoded form data and JSON bodies
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 /* ------------------------------------------------------------------
    MONGODB SETUP
-   - Connect to your MongoDB cluster with Mongoose
-   - NOTE: credentials are hardcoded here. Consider .env:
-     mongoose.connect(process.env.MONGO_URL)
 -------------------------------------------------------------------*/
 mongoose.connect(
     'mongodb+srv://dbuser:dbUserPassword@cluster0.aonlnhv.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',
@@ -29,11 +25,14 @@ mongoose.connect(
     .catch(err => console.error('MongoDB Fehler:', err));
 
 /* ------------------------------------------------------------------
-   MONGOOSE SCHEMAS & MODELS
-   - Book embedded in User
-   - Post embedded in User
-   - User holds profile + books + posts
+   MONGOOSE MODELS
 -------------------------------------------------------------------*/
+const BookMoodEntrySchema = new mongoose.Schema({
+    mood: { type: String, trim: true },
+    note: { type: String, trim: true },
+    at:   { type: Date, default: Date.now }
+}, { _id: false });
+
 const bookSchema = new mongoose.Schema({
     id: String,
     title: String,
@@ -45,9 +44,10 @@ const bookSchema = new mongoose.Schema({
         default: 'none'
     },
     mood: String,
+    moodHistory: { type: [BookMoodEntrySchema], default: [] },
     favourite: { type: Boolean, default: false },
-    tags: [String],
-    rating: Number
+    rating: Number,
+    finishedAt: Date
 });
 
 const postSchema = new mongoose.Schema({
@@ -62,58 +62,125 @@ const postSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
+const moodEnum = ['Great', 'Good', 'Average', 'Low', 'Bad'];
+const moodSchema = new mongoose.Schema({
+    value: { type: String, enum: moodEnum },
+    at: { type: Date, default: Date.now }
+});
+
 const userSchema = new mongoose.Schema({
     username: String,
-    password: String,   // NOTE: stored plaintext (TODO: hash with bcrypt)
+    password: String,   // NOTE: plaintext (TODO: bcrypt)
     email: String,
     profile: {
         name: String,
         bio: String
     },
     books: [bookSchema],
-    posts: [postSchema]
+    posts: [postSchema],
+    moods: [moodSchema]
 });
 
 const User = mongoose.model('User', userSchema);
 
 /* ------------------------------------------------------------------
+   HELPERS FOR STATS
+-------------------------------------------------------------------*/
+function startOfYear(d = new Date()) { return new Date(d.getFullYear(), 0, 1); }
+function endOfYear(d = new Date()) { return new Date(d.getFullYear(), 11, 31, 23, 59, 59, 999); }
+
+function computeStats(user) {
+    if (!user) return { booksThisYear: 0, moodTracker: '—', currentMood: '—' };
+
+    const s = startOfYear(), e = endOfYear();
+
+    // Books finished this year
+    const booksThisYear = (user.books || []).filter(
+        b => b.progress === 'read' && b.finishedAt && b.finishedAt >= s && b.finishedAt <= e
+    ).length;
+
+    // Mood tracker: dominant mood last 30 days
+    const currentMood = user.moods?.length ? user.moods[user.moods.length - 1].value : '—';
+    const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const last30 = (user.moods || []).filter(m => m.at >= cutoff);
+    const buckets = { Great: 0, Good: 0, Average: 0, Low: 0, Bad: 0 };
+    last30.forEach(m => { if (buckets[m.value] !== undefined) buckets[m.value]++; });
+    const top = Object.entries(buckets).sort((a, b) => b[1] - a[1])[0];
+    const moodTracker = top && top[1] > 0 ? `${top[0]} (30d)` : currentMood;
+
+    return { booksThisYear, moodTracker, currentMood };
+}
+
+const MOOD_SCORE = { Great: 5, Good: 4, Average: 3, Low: 2, Bad: 1 };
+
+function labelFromScore(score) {
+    if (score === null || score === undefined) return '—';
+    if (score >= 4.5) return 'Great';
+    if (score >= 3.5) return 'Good';
+    if (score >= 2.5) return 'Average';
+    if (score >= 1.5) return 'Low';
+    return 'Bad';
+}
+
+function averageMood(user, days = 30) {
+    if (!user) return { score: null, label: '—', count: 0 };
+
+    const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+    const scores = [];
+
+    // Book mood history
+    (user.books || []).forEach(b => {
+        (b.moodHistory || []).forEach(entry => {
+            if (entry?.at && entry.at >= since) {
+                const s = MOOD_SCORE[entry.mood];
+                if (s) scores.push(s);
+            }
+        });
+    });
+
+    // Profile moods
+    (user.moods || []).forEach(m => {
+        if (m?.at && m.at >= since) {
+            const s = MOOD_SCORE[m.value];
+            if (s) scores.push(s);
+        }
+    });
+
+    if (scores.length === 0) return { score: null, label: '—', count: 0 };
+
+    const sum = scores.reduce((a, b) => a + b, 0);
+    const avg = sum / scores.length;
+    return { score: Number(avg.toFixed(2)), label: labelFromScore(avg), count: scores.length };
+}
+
+/* ------------------------------------------------------------------
    ROUTES
-   - Auth (signup/login)
-   - Books (save/remove/list)
-   - Profile (basic)
-   - Posts (add/list)
 -------------------------------------------------------------------*/
 
 // ---------- SIGNUP ----------
-// Creates a new user document if the username is free
 app.post('/signup', async (req, res) => {
     const { username, password, email, name, bio } = req.body;
-
-    // Check if username is unique
     const existingUser = await User.findOne({ username });
     if (existingUser) return res.send('Username already taken.');
 
-    // Create and store
     const newUser = new User({
         username,
-        password, // TODO: hash (bcrypt.hash(password, 12))
+        password,
         email,
         profile: { name: name || '', bio: bio || '' },
         books: [],
-        posts: []
+        posts: [],
+        moods: []
     });
 
     await newUser.save();
     console.log(`🟢 New user registered: ${username}`);
-    res.redirect('/'); // Go back to login page
+    res.redirect('/');
 });
 
 // ---------- LOGIN ----------
-// Login check (username+password match)
-// NOTE: plaintext comparison (TODO: compare bcrypt hashes)
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
-
     const user = await User.findOne({ username, password });
     if (user) {
         console.log(`🔵 User logged in: ${username}`);
@@ -127,32 +194,26 @@ app.post('/login', async (req, res) => {
 app.post('/saveBook', async (req, res) => {
     try {
         const { username, book } = req.body;
-
         const user = await User.findOne({ username });
         if (!user) return res.status(404).send('User not found.');
 
-        // Sensible fallbacks
         if (!book.progress) book.progress = 'want';
         if (book.favourite === undefined) book.favourite = false;
 
-        // If thumbnail missing, try Google Books (server-side fetch)
-        if (!book.thumbnail) {
-            const fetch = (await import('node-fetch')).default;
-            const googleRes = await fetch(`https://www.googleapis.com/books/v1/volumes/${book.id}`);
-            const googleData = await googleRes.json();
-            book.thumbnail = googleData.volumeInfo?.imageLinks?.thumbnail || '';
-        }
-
-        // Upsert logic: update if exists, else push
         const existing = user.books.find(b => b.id === book.id);
         if (existing) {
+            const was = existing.progress;
             Object.assign(existing, book);
+            if (existing.progress === 'read' && (!existing.finishedAt || was !== 'read')) {
+                existing.finishedAt = new Date();
+            }
         } else {
+            if (book.progress === 'read') book.finishedAt = new Date();
             user.books.push(book);
         }
 
         await user.save();
-        res.send('Book saved (with categories & thumbnail)!');
+        res.send('Book saved!');
     } catch (err) {
         console.error(err);
         res.status(500).send('Error saving book');
@@ -160,53 +221,105 @@ app.post('/saveBook', async (req, res) => {
 });
 
 // ---------- REMOVE BOOK ----------
-// Deletes a book from the embedded books by ID
 app.post('/removeBook', async (req, res) => {
     const { username, bookId } = req.body;
-
     const user = await User.findOne({ username });
     if (!user) return res.send('User not found.');
-
     user.books = user.books.filter(b => b.id !== bookId);
     await user.save();
     res.send('Book removed!');
 });
 
 // ---------- GET USER BOOKS ----------
-// Returns the user’s embedded books as JSON
 app.get('/getUserBooks/:username', async (req, res) => {
     const user = await User.findOne({ username: req.params.username });
-    if (user) {
-        res.json(user.books);
-    } else {
-        res.status(404).json({ error: 'User not found' });
+    if (user) res.json(user.books);
+    else res.status(404).json({ error: 'User not found' });
+});
+
+// ---------- GET PROFILE + STATS ----------
+app.get('/getProfile/:username', async (req, res) => {
+    const user = await User.findOne({ username: req.params.username });
+    if (user) res.json({ profile: user.profile, books: user.books, stats: computeStats(user) });
+    else res.status(404).json({ error: 'User not found' });
+});
+
+// ---------- SET MOOD ----------
+app.post('/profile/mood', async (req, res) => {
+    const { username, mood } = req.body;
+    const allowed = ['Great', 'Good', 'Average', 'Low', 'Bad'];
+    if (!allowed.includes(mood)) return res.status(400).json({ error: 'Invalid mood' });
+
+    const user = await User.findOneAndUpdate(
+        { username },
+        { $push: { moods: { value: mood, at: new Date() } } },
+        { new: true }
+    );
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    res.json({ ok: true, stats: computeStats(user) });
+});
+
+// ---------- NEW: SET/APPEND MOOD FOR A SAVED BOOK ----------
+app.post('/books/:id/mood', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { username, mood = '', note = '' } = req.body || {};
+        if (!username) return res.status(400).json({ error: 'username required' });
+
+        const user = await User.findOne({ username });
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        const book = (user.books || []).find(b => b.id === id);
+        if (!book) return res.status(404).json({ error: 'book not found for user' });
+
+        book.mood = mood;
+        book.moodNote = note;
+        book.moodHistory = book.moodHistory || [];
+        book.moodHistory.push({ mood, note, at: new Date() });
+
+        await user.save();
+        res.json({ ok: true, book: {
+                id: book.id, mood: book.mood, moodNote: book.moodNote,
+                lastMoodAt: book.moodHistory[book.moodHistory.length - 1]?.at
+            }});
+    } catch (e) {
+        console.error('set book mood failed:', e);
+        res.status(500).json({ error: 'internal error' });
     }
 });
 
-// ---------- GET PROFILE ----------
-// Returns profile + books (simple profile API)
-app.get('/getProfile/:username', async (req, res) => {
-    const user = await User.findOne({ username: req.params.username });
-    if (user) {
-        res.json({ profile: user.profile, books: user.books });
-    } else {
-        res.status(404).json({ error: 'User not found' });
+// ---------- STATS ENDPOINT ----------
+app.get('/stats/:username', async (req, res) => {
+    try {
+        const user = await User.findOne({ username: req.params.username });
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        const base = computeStats(user);
+        const avg30 = averageMood(user, 30);
+
+        res.json({
+            ...base,
+            avgMood30dScore: avg30.score,
+            avgMood30dLabel: avg30.label,
+            avgMood30dCount: avg30.count
+        });
+    } catch (e) {
+        console.error('stats failed:', e);
+        res.status(500).json({ error: 'internal error' });
     }
 });
 
 // ---------- ADD POST ----------
-// Creates a post
 app.post('/addPost', async (req, res) => {
     try {
         const { username, bookId, bookTitle, bookThumbnail, content, photoUrl, musicUrl, location } = req.body;
-
         const user = await User.findOne({ username });
         if (!user) return res.status(404).send('User not found.');
 
         let title = bookTitle || null;
         let thumb = bookThumbnail || null;
 
-        // 1) Try from user's library first
         if (bookId && (!title || !thumb)) {
             const inLib = user.books.find(b => b.id === bookId);
             if (inLib) {
@@ -215,21 +328,6 @@ app.post('/addPost', async (req, res) => {
             }
         }
 
-        // 2) Fallback: Google Books lookup
-        if (bookId && (!title || !thumb)) {
-            try {
-                const fetch = (await import('node-fetch')).default;
-                const r = await fetch(`https://www.googleapis.com/books/v1/volumes/${encodeURIComponent(bookId)}`);
-                if (r.ok) {
-                    const j = await r.json();
-                    const info = j?.volumeInfo || {};
-                    title = title || info.title || null;
-                    thumb = thumb || info.imageLinks?.thumbnail || null;
-                }
-            } catch (_) { /* ignore network errors gracefully */ }
-        }
-
-        // Compose and save embedded post
         const newPost = {
             id: Date.now().toString(),
             bookId: bookId || null,
@@ -244,8 +342,6 @@ app.post('/addPost', async (req, res) => {
 
         user.posts.push(newPost);
         await user.save();
-
-        console.log(`🟡 New post for ${username}`);
         res.send('Post added!');
     } catch (err) {
         console.error(err);
@@ -254,28 +350,22 @@ app.post('/addPost', async (req, res) => {
 });
 
 // ---------- GET USER POSTS ----------
-// Returns only the posts for a given username
 app.get('/getPosts/:username', async (req, res) => {
     const user = await User.findOne({ username: req.params.username });
     res.json(user && user.posts ? user.posts : []);
 });
 
 // ---------- GET ALL POSTS ----------
-// Flattens posts from all users, adds username, sorts by date desc
 app.get('/getAllPosts', async (req, res) => {
     try {
-        // Only fetch username + posts for efficiency
         const users = await User.find({}, { username: 1, posts: 1, _id: 0 });
         const allPosts = [];
-
         users.forEach(user => {
             (user.posts || []).forEach(post => {
-                // Ensure plain object (handles Mongoose docs)
                 const base = typeof post.toObject === 'function' ? post.toObject() : post;
                 allPosts.push({ username: user.username, ...base });
             });
         });
-
         allPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         res.json(allPosts);
     } catch (err) {
@@ -286,19 +376,11 @@ app.get('/getAllPosts', async (req, res) => {
 
 /* ------------------------------------------------------------------
    STATIC FILES & ROOT ROUTE
-   - Root "/" -> index.html
-   - Catch-all falls back to index.html
 -------------------------------------------------------------------*/
-
-// Serve everything inside the "public" folder (or project root if no folder)
 app.use(express.static(path.join(__dirname, '../frontend')));
-
-// Root route -> serve index.html
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
-
-// Catch-all for unknown routes (single-page app style)
 app.use((req, res) => {
     res.status(404).sendFile(path.join(__dirname, '../frontend/index.html'));
 });
@@ -309,12 +391,3 @@ app.use((req, res) => {
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
-
-/* ==================================================================
-   OPTIONAL IMPROVEMENTS (no behavior change in this file)
-   - Move secrets to .env (MONGO_URL, PORT)
-   - Hash passwords with bcrypt; use sessions/JWT for auth
-   - Add CORS/rate limiting if you open APIs publicly
-   - Validate inputs (celebrate/joi/zod) for /saveBook, /addPost, etc.
-   - Handle Google Books fetch errors with timeouts/retries
-================================================================== */
