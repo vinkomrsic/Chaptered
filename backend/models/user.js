@@ -24,7 +24,7 @@ const PostSchema = new mongoose.Schema({
 // User
 const UserSchema = new mongoose.Schema({
     username: { type: String, unique: true, index: true },
-    password: String, // TODO: hash
+    password: String, // Can be hashed later
     email: String,
     profile: {
         name: String,

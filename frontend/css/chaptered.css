@@ -1,6 +1,6 @@
 /* =========== Variables =========== */
 :root{
-    --bg:           #cbb397;   /* current body background */
+    --bg:           #cbb397;
     --text:         #2e3a59;
     --muted:        #6d6d6d;
 
@@ -121,7 +121,7 @@ body{
     font-weight: bold;
 }
 
-/* =========== Components: Search / Tabs / Buttons =========== */
+/* =========== Search / Tabs / Buttons =========== */
 .search-box{
     display: flex;
     max-width: 400px;
@@ -236,7 +236,6 @@ body{
     flex-wrap: wrap;
 }
 
-/* support both class names */
 .book-row.scrollable,
 .book-row.scrollable-row{
     flex-wrap: nowrap;
@@ -273,7 +272,6 @@ body{
 
 .book-shelves{ width: fit-content; }
 
-/* extra data lines */
 .extra-book-data p{
     margin: .25rem 0;
     font-size: .9rem;
@@ -327,9 +325,9 @@ body{
 }
 .profile-info .logout-button { margin-top: 0.75rem; }
 
-/* reflection / note box (shared) */
+/* reflection */
 .reflection-box{
-    background-color: #fef4e8; /* explore overrides below */
+    background-color: #fef4e8;
     padding: 1.5rem;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
@@ -376,7 +374,7 @@ body{
     color: var(--paper);
 }
 
-/* Post form (override reflection-box for explore) */
+/* Post form */
 .reflection-box{
     background-color: var(--paper);
     border: 1px solid var(--line);
@@ -499,7 +497,6 @@ body{
     box-shadow: var(--shadow);
 }
 
-/* cover inside detail section */
 .book-detail img{
     width:140px; border-radius: var(--radius-lg);
     box-shadow: var(--shadow); margin-top:1rem;
@@ -528,8 +525,7 @@ body{
 .book-state button:hover{ background-color:#f3b88f; }
 
 /* ================================
-   AUTH PAGES (Login + Signup) — unified
-   Makes both pages visually identical
+   AUTH PAGES (Login + Signup)
 ================================ */
 .login-body,
 .signup-body{
@@ -632,7 +628,7 @@ body{
 }
 
 .mood-picker button:hover{
-    background: #fef4e8;    /* highlight box tone */
+    background: #fef4e8;
 }
 
 .mood-picker button.active{

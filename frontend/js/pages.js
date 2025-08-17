@@ -2,39 +2,30 @@
 // GLOBAL INIT (core pages only)
 // ==============================
 document.addEventListener("DOMContentLoaded", () => {
-    // Common UI setups that can exist on multiple pages
+    // Always-available UI hooks
     setupLibraryTabs();
     setupSearch();
     setupShelfToggle();
 
     const path = window.location.pathname;
 
-    // Page-specific bootstraps (core pages)
-    if (path.includes('dashboard') || path.includes('home')) {
-        loadDashboardBooks();
-    }
-    if (path.includes('library')) {
-        loadSavedBooks();
-    }
-    if (path.includes('profile')) {
-        loadProfile();
-    }
+    // Bootstraps per page
+    if (path.includes('dashboard') || path.includes('home')) loadDashboardBooks();
+    if (path.includes('library')) loadSavedBooks();
+    if (path.includes('profile')) loadProfile();
 
-    // If a stats box exists on the page, fetch real stats
-    if (document.querySelector('.quick-stat')) {
-        fetchAndRenderStats();
-    }
+    // If stats box exists, load stats
+    if (document.querySelector('.quick-stat')) fetchAndRenderStats();
 
-    // Explore + Book pages now self-initialize in their own files
+    // Explore & Book pages initialize in their own files
 });
 
 // ==============================
-// LIBRARY – TABS FILTER
+// LIBRARY – Tabs filter
 // ==============================
 function setupLibraryTabs() {
     const tabButtons = document.querySelectorAll(".tab");
     const categories = document.querySelectorAll(".book-category");
-
     if (!tabButtons.length || !categories.length) return;
 
     tabButtons.forEach(button => {
@@ -53,24 +44,25 @@ function setupLibraryTabs() {
 }
 
 // ==============================
-// SEARCH BAR – GOOGLE BOOKS API
+// SEARCH BAR – Google Books API
 // ==============================
 function setupSearch() {
     const searchInput = document.querySelector("input[name='search']") || document.getElementById('dashboard-search');
     const searchResultsWrapper = document.getElementById("results-container") || document.getElementById("currently-reading");
     const searchSection = document.getElementById("search-results");
-
     if (!searchInput || !searchResultsWrapper) return;
 
     searchInput.addEventListener("input", function () {
         const query = this.value.trim();
 
+        // Clear when empty
         if (!query) {
             searchResultsWrapper.innerHTML = "";
             if (searchSection) searchSection.style.display = "none";
             return;
         }
 
+        // Query Google Books
         fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`)
             .then(res => res.json())
             .then(data => {
@@ -94,7 +86,7 @@ function setupSearch() {
 }
 
 // ==============================
-// HOME PAGE – SHELF BUTTONS
+// HOME PAGE – Shelf toggle
 // ==============================
 function setupShelfToggle() {
     const shelfButtons = document.querySelectorAll(".shelf-button");
@@ -115,12 +107,13 @@ function setupShelfToggle() {
 }
 
 // ==============================
-// LIBRARY PAGE – LOAD SAVED BOOKS
+// LIBRARY PAGE – Load saved books
 // ==============================
 function loadSavedBooks() {
     const username = localStorage.getItem('username');
     if (!username) return alert("You must be logged in to view your library.");
 
+    // Clear all sections
     ['reading-books', 'read-books', 'want-books', 'fav-books', 'all-books'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.innerHTML = '';
@@ -150,28 +143,27 @@ function loadSavedBooks() {
                 if (book.progress === 'reading') document.getElementById('reading-books')?.appendChild(tile.cloneNode(true));
                 if (book.progress === 'read') document.getElementById('read-books')?.appendChild(tile.cloneNode(true));
                 if (book.progress === 'want') document.getElementById('want-books')?.appendChild(tile.cloneNode(true));
-
                 document.getElementById('all-books')?.appendChild(tile);
-
                 if (book.favourite) document.getElementById('fav-books')?.appendChild(tile.cloneNode(true));
             });
         })
-        .catch(err => console.error("❌ Failed to load books:", err));
+        .catch(err => console.error("Failed to load books:", err));
 }
 
 // ==============================
-// DASHBOARD – LOAD BOOKS
+// DASHBOARD – Load books
 // ==============================
 function loadDashboardBooks() {
     const username = localStorage.getItem('username');
     if (!username) return;
 
+    // Clear all dashboard sections
     ['currently-reading', 'dashboard-read', 'dashboard-want', 'dashboard-fav', 'dashboard-all'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.innerHTML = '';
     });
 
-    // Load real stats immediately
+    // Fetch stats right away
     fetchAndRenderStats();
 
     fetch(`/getUserBooks/${username}`)
@@ -196,15 +188,14 @@ function loadDashboardBooks() {
                 if (book.progress === 'read') document.getElementById('dashboard-read')?.appendChild(tile.cloneNode(true));
                 if (book.progress === 'want') document.getElementById('dashboard-want')?.appendChild(tile.cloneNode(true));
                 if (book.favourite) document.getElementById('dashboard-fav')?.appendChild(tile.cloneNode(true));
-
                 document.getElementById('dashboard-all')?.appendChild(tile);
             });
         })
-        .catch(err => console.error("❌ Failed to load dashboard books:", err));
+        .catch(err => console.error("Failed to load dashboard books:", err));
 }
 
 // ==============================
-// POSTS – ADD
+// POSTS – Add new post
 // ==============================
 function addPost() {
     const username = localStorage.getItem('username');
@@ -229,18 +220,18 @@ function addPost() {
             document.getElementById('postPhoto').value = '';
             document.getElementById('postMusic').value = '';
             document.getElementById('postLocation').value = '';
-            loadUserPosts?.(); // if present in your codebase
+            loadUserPosts?.(); // optional refresh; doesnt seem to work
         });
 }
 
 // ==============================
-// PROFILE PAGE – LOAD PROFILE INFO
+// PROFILE – Load profile info
 // ==============================
 function loadProfile() {
     const username = localStorage.getItem('username');
     if (!username) return;
 
-    // Load real stats immediately
+    // Stats immediately
     fetchAndRenderStats();
 
     fetch(`/getProfile/${username}`)
@@ -252,6 +243,7 @@ function loadProfile() {
             document.querySelector('.profile-info h2').textContent = profile.name;
             document.querySelector('.profile-bio').textContent = profile.bio;
 
+            // Show favourites
             const favBooks = books.filter(b => b.favourite);
             const favContainer = document.querySelector('.book-category .book-row');
             if (favContainer) {
@@ -265,11 +257,11 @@ function loadProfile() {
                 });
             }
         })
-        .catch(err => console.error('❌ Failed to load profile:', err));
+        .catch(err => console.error('Failed to load profile:', err));
 }
 
 // ==============================
-// PROFILE – Logout button wiring
+// PROFILE – Logout button
 // ==============================
 document.addEventListener("DOMContentLoaded", () => {
     const logoutBtn = document.getElementById('logoutBtn');
@@ -282,18 +274,13 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==============================
-// DASHBOARD & PROFILE — LIVE STATS (robust)
+// DASHBOARD & PROFILE – Stats box
 // ==============================
 async function fetchAndRenderStats() {
     const statBox = document.querySelector('.quick-stat');
     const username = localStorage.getItem('username');
-
-    if (!statBox) {
-        console.warn('[stats] No .quick-stat element on this page.');
-        return;
-    }
+    if (!statBox) return;
     if (!username) {
-        console.warn('[stats] No username in localStorage. Are you logged in on this page?');
         statBox.innerHTML = `
           <p><i class="fa fa-calendar"></i> Books This Year <span>—</span></p>
           <p><i class="fa fa-book"></i> Favorite Genre <span>—</span></p>
@@ -304,15 +291,11 @@ async function fetchAndRenderStats() {
 
     try {
         const res = await fetch(`/stats/${encodeURIComponent(username)}`);
-        if (!res.ok) {
-            console.error('[stats] HTTP error', res.status);
-            throw new Error(`HTTP ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const stats = await res.json();
-        console.debug('📊 /stats response', stats);
         renderQuickStatBox(stats);
     } catch (err) {
-        console.error('❌ Failed to load stats:', err);
+        console.error('Failed to load stats:', err);
         statBox.innerHTML = `
           <p><i class="fa fa-calendar"></i> Books This Year <span>—</span></p>
           <p><i class="fa fa-book"></i> Favorite Genre <span>—</span></p>
@@ -321,13 +304,12 @@ async function fetchAndRenderStats() {
     }
 }
 
+// Render stats into .quick-stat
 function renderQuickStatBox(stats) {
     const statBox = document.querySelector('.quick-stat');
     if (!statBox) return;
 
-    const booksThisYear  = typeof stats.booksThisYear === 'number' ? stats.booksThisYear : '—';
-
-    // Prefer profile tracker; fall back to average from last 30d (server-provided fields)
+    const booksThisYear = typeof stats.booksThisYear === 'number' ? stats.booksThisYear : '—';
     const moodTrackerPrimary = (stats.moodTracker && stats.moodTracker !== '—')
         ? stats.moodTracker
         : (stats.avgMood30dLabel || '—');

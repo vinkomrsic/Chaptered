@@ -2,15 +2,15 @@
 // EXPLORE – Tabs, Load, Picker, UI toggles
 // ==============================
 
-// Ensure the shared cache exists even if common.js wasn't loaded for some reason
+// Ensure cache exists even if common.js wasn't loaded
 window.userBooksCache = window.userBooksCache || [];
 
-// Boot only on the explore page
+// Init only on explore.html
 document.addEventListener('DOMContentLoaded', () => {
     const isExplore = /explore\.html/i.test(window.location.pathname);
     if (!isExplore) return;
 
-    // Wire the "Create a New Post" toggle
+    // Toggle create post form
     const toggleBtn = document.getElementById("togglePostForm");
     const formContainer = document.getElementById("postFormContainer");
     if (toggleBtn && formContainer) {
@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Prefetch user's books so post rendering has titles/covers
+    // Prefetch user’s books (for post display)
     const username = localStorage.getItem('username');
     if (username) {
         fetch(`/getUserBooks/${username}`)
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ------------------------------
-// Tabs
+// Tabs (switch global/my posts)
 // ------------------------------
 function setupExploreTabs() {
     const tabs = document.querySelectorAll('.explore-tab');
@@ -68,6 +68,7 @@ function loadMyPosts() {
         .then(posts => renderExplorePosts(posts));
 }
 
+// Render posts into the feed
 async function renderExplorePosts(posts) {
     const container = document.getElementById('explore-posts');
     if (!container) return;
@@ -81,11 +82,12 @@ async function renderExplorePosts(posts) {
     for (const post of posts) {
         let bookHtml = '';
 
+        // Try to attach book info
         if (post.bookId) {
             let title = post.bookTitle || null;
             let thumb = post.bookThumbnail || null;
 
-            // Fallback to viewer's cache if needed
+            // Fallback: try local cache
             if ((!title || !thumb) && Array.isArray(window.userBooksCache)) {
                 const match = window.userBooksCache.find(b => b.id === post.bookId);
                 if (match) {
@@ -106,6 +108,7 @@ async function renderExplorePosts(posts) {
             }
         }
 
+        // Build the post block
         const div = document.createElement('div');
         div.className = 'post';
         div.innerHTML = `
@@ -118,7 +121,7 @@ async function renderExplorePosts(posts) {
       <small>${new Date(post.createdAt).toLocaleString()}</small>
     `;
 
-        // Click the book area to open details
+        // Make book section clickable → detail page
         if (post.bookId && div.querySelector('.post-book-info')) {
             const area = div.querySelector('.post-book-info');
             area.style.cursor = 'pointer';
@@ -130,7 +133,7 @@ async function renderExplorePosts(posts) {
 }
 
 // ------------------------------
-// Picker
+// Book picker for posts
 // ------------------------------
 function openBookPicker() {
     const username = localStorage.getItem('username');
@@ -142,12 +145,14 @@ function openBookPicker() {
             const list = document.getElementById('bookPickerList');
             list.innerHTML = '';
 
+            // "No book" option
             const none = document.createElement('div');
             none.className = 'book-picker-item';
             none.textContent = 'No Book';
             none.onclick = () => selectBook(null);
             list.appendChild(none);
 
+            // Add all saved books
             (books || []).forEach(book => {
                 const item = document.createElement('div');
                 item.className = 'book-picker-item';
@@ -163,6 +168,7 @@ function openBookPicker() {
         });
 }
 
+// Set the selected book in form
 function selectBook(book) {
     if (book) {
         document.getElementById('postBook').value = book.id;
@@ -175,10 +181,10 @@ function selectBook(book) {
         document.getElementById('selectedBookTitle').textContent = 'Click to select a book';
         document.getElementById('selectedBookCover').style.display = 'none';
     }
-
     closeBookPicker();
 }
 
+// Close picker modal
 function closeBookPicker() {
     document.getElementById('bookPickerModal').style.display = 'none';
 }

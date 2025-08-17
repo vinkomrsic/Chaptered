@@ -1,5 +1,5 @@
 // =====================================
-// COMMON
+// COMMON, USED BY ALL PAGES
 // =====================================
 
 // Global cache used by Explore and picker

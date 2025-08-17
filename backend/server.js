@@ -1,22 +1,16 @@
-// ================================
-// IMPORTS & BASIC SETUP
-// ================================
+// ===== IMPORTS & BASIC SETUP =====
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const path = require('path');
 
 const app = express();
-const port = 3000; // Server port (TODO: move to process.env.PORT for deploy)
+const port = 3000; // Server port
 
-// Serve static HTML, CSS, JS files from the project root
-app.use(express.static(__dirname));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-/* ------------------------------------------------------------------
-   MONGODB SETUP
--------------------------------------------------------------------*/
+// ===== MONGODB SETUP =====
 mongoose.connect(
     'mongodb+srv://dbuser:dbUserPassword@cluster0.aonlnhv.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',
     { useNewUrlParser: true, useUnifiedTopology: true }
@@ -24,9 +18,7 @@ mongoose.connect(
     .then(() => console.log('MongoDB verbunden'))
     .catch(err => console.error('MongoDB Fehler:', err));
 
-/* ------------------------------------------------------------------
-   MONGOOSE MODELS
--------------------------------------------------------------------*/
+// ===== MONGOOSE MODELS =====
 const BookMoodEntrySchema = new mongoose.Schema({
     mood: { type: String, trim: true },
     note: { type: String, trim: true },
@@ -70,7 +62,7 @@ const moodSchema = new mongoose.Schema({
 
 const userSchema = new mongoose.Schema({
     username: String,
-    password: String,   // NOTE: plaintext (TODO: bcrypt)
+    password: String,   // ⚠️ Plaintext, should be hashed with bcrypt in production
     email: String,
     profile: {
         name: String,
@@ -83,9 +75,7 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
-/* ------------------------------------------------------------------
-   HELPERS FOR STATS
--------------------------------------------------------------------*/
+// ===== HELPERS FOR STATS =====
 function startOfYear(d = new Date()) { return new Date(d.getFullYear(), 0, 1); }
 function endOfYear(d = new Date()) { return new Date(d.getFullYear(), 11, 31, 23, 59, 59, 999); }
 
@@ -94,12 +84,10 @@ function computeStats(user) {
 
     const s = startOfYear(), e = endOfYear();
 
-    // Books finished this year
     const booksThisYear = (user.books || []).filter(
         b => b.progress === 'read' && b.finishedAt && b.finishedAt >= s && b.finishedAt <= e
     ).length;
 
-    // Mood tracker: dominant mood last 30 days
     const currentMood = user.moods?.length ? user.moods[user.moods.length - 1].value : '—';
     const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     const last30 = (user.moods || []).filter(m => m.at >= cutoff);
@@ -128,7 +116,6 @@ function averageMood(user, days = 30) {
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
     const scores = [];
 
-    // Book mood history
     (user.books || []).forEach(b => {
         (b.moodHistory || []).forEach(entry => {
             if (entry?.at && entry.at >= since) {
@@ -138,7 +125,6 @@ function averageMood(user, days = 30) {
         });
     });
 
-    // Profile moods
     (user.moods || []).forEach(m => {
         if (m?.at && m.at >= since) {
             const s = MOOD_SCORE[m.value];
@@ -153,15 +139,13 @@ function averageMood(user, days = 30) {
     return { score: Number(avg.toFixed(2)), label: labelFromScore(avg), count: scores.length };
 }
 
-/* ------------------------------------------------------------------
-   ROUTES
--------------------------------------------------------------------*/
+// ===== ROUTES =====
 
-// ---------- SIGNUP ----------
+// --- SIGNUP ---
 app.post('/signup', async (req, res) => {
     const { username, password, email, name, bio } = req.body;
     const existingUser = await User.findOne({ username });
-    if (existingUser) return res.send('Username already taken.');
+    if (existingUser) return res.status(400).json({ error: 'Username already taken' });
 
     const newUser = new User({
         username,
@@ -174,28 +158,28 @@ app.post('/signup', async (req, res) => {
     });
 
     await newUser.save();
-    console.log(`🟢 New user registered: ${username}`);
+    console.log(`New user registered: ${username}`);
     res.redirect('/');
 });
 
-// ---------- LOGIN ----------
+// --- LOGIN ---
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
     const user = await User.findOne({ username, password });
     if (user) {
-        console.log(`🔵 User logged in: ${username}`);
+        console.log(`User logged in: ${username}`);
         res.redirect('/profile.html');
     } else {
-        res.send('Login failed: Invalid username or password.');
+        res.status(401).json({ error: 'Invalid username or password' });
     }
 });
 
-// ---------- SAVE BOOK ----------
+// --- SAVE BOOK ---
 app.post('/saveBook', async (req, res) => {
     try {
         const { username, book } = req.body;
         const user = await User.findOne({ username });
-        if (!user) return res.status(404).send('User not found.');
+        if (!user) return res.status(404).json({ error: 'User not found' });
 
         if (!book.progress) book.progress = 'want';
         if (book.favourite === undefined) book.favourite = false;
@@ -216,35 +200,43 @@ app.post('/saveBook', async (req, res) => {
         res.send('Book saved!');
     } catch (err) {
         console.error(err);
-        res.status(500).send('Error saving book');
+        res.status(500).json({ error: 'Error saving book' });
     }
 });
 
-// ---------- REMOVE BOOK ----------
+// --- REMOVE BOOK ---
 app.post('/removeBook', async (req, res) => {
     const { username, bookId } = req.body;
     const user = await User.findOne({ username });
-    if (!user) return res.send('User not found.');
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
     user.books = user.books.filter(b => b.id !== bookId);
     await user.save();
     res.send('Book removed!');
 });
 
-// ---------- GET USER BOOKS ----------
+// --- GET USER BOOKS ---
 app.get('/getUserBooks/:username', async (req, res) => {
     const user = await User.findOne({ username: req.params.username });
     if (user) res.json(user.books);
     else res.status(404).json({ error: 'User not found' });
 });
 
-// ---------- GET PROFILE + STATS ----------
+// --- GET PROFILE + STATS ---
 app.get('/getProfile/:username', async (req, res) => {
     const user = await User.findOne({ username: req.params.username });
-    if (user) res.json({ profile: user.profile, books: user.books, stats: computeStats(user) });
-    else res.status(404).json({ error: 'User not found' });
+    if (user) {
+        res.json({
+            profile: user.profile,
+            books: user.books,
+            stats: computeStats(user)
+        });
+    } else {
+        res.status(404).json({ error: 'User not found' });
+    }
 });
 
-// ---------- SET MOOD ----------
+// --- SET PROFILE MOOD ---
 app.post('/profile/mood', async (req, res) => {
     const { username, mood } = req.body;
     const allowed = ['Great', 'Good', 'Average', 'Low', 'Bad'];
@@ -255,16 +247,18 @@ app.post('/profile/mood', async (req, res) => {
         { $push: { moods: { value: mood, at: new Date() } } },
         { new: true }
     );
+
     if (!user) return res.status(404).json({ error: 'User not found' });
 
     res.json({ ok: true, stats: computeStats(user) });
 });
 
-// ---------- NEW: SET/APPEND MOOD FOR A SAVED BOOK ----------
+// --- SET MOOD FOR A BOOK ---
 app.post('/books/:id/mood', async (req, res) => {
     try {
         const { id } = req.params;
-        const { username, mood = '', note = '' } = req.body || {};
+        const { username, mood = '' } = req.body || {};
+
         if (!username) return res.status(400).json({ error: 'username required' });
 
         const user = await User.findOne({ username });
@@ -274,22 +268,26 @@ app.post('/books/:id/mood', async (req, res) => {
         if (!book) return res.status(404).json({ error: 'book not found for user' });
 
         book.mood = mood;
-        book.moodNote = note;
         book.moodHistory = book.moodHistory || [];
-        book.moodHistory.push({ mood, note, at: new Date() });
+        book.moodHistory.push({ mood, at: new Date() });
 
         await user.save();
-        res.json({ ok: true, book: {
-                id: book.id, mood: book.mood, moodNote: book.moodNote,
+
+        res.json({
+            ok: true,
+            book: {
+                id: book.id,
+                mood: book.mood,
                 lastMoodAt: book.moodHistory[book.moodHistory.length - 1]?.at
-            }});
+            }
+        });
     } catch (e) {
         console.error('set book mood failed:', e);
         res.status(500).json({ error: 'internal error' });
     }
 });
 
-// ---------- STATS ENDPOINT ----------
+// --- USER STATS ---
 app.get('/stats/:username', async (req, res) => {
     try {
         const user = await User.findOne({ username: req.params.username });
@@ -310,12 +308,12 @@ app.get('/stats/:username', async (req, res) => {
     }
 });
 
-// ---------- ADD POST ----------
+// --- ADD POST ---
 app.post('/addPost', async (req, res) => {
     try {
         const { username, bookId, bookTitle, bookThumbnail, content, photoUrl, musicUrl, location } = req.body;
         const user = await User.findOne({ username });
-        if (!user) return res.status(404).send('User not found.');
+        if (!user) return res.status(404).json({ error: 'User not found' });
 
         let title = bookTitle || null;
         let thumb = bookThumbnail || null;
@@ -345,17 +343,20 @@ app.post('/addPost', async (req, res) => {
         res.send('Post added!');
     } catch (err) {
         console.error(err);
-        res.status(500).send('Error adding post');
+        res.status(500).json({ error: 'Error adding post' });
     }
 });
 
-// ---------- GET USER POSTS ----------
+// --- GET USER POSTS (newest first) ---
 app.get('/getPosts/:username', async (req, res) => {
     const user = await User.findOne({ username: req.params.username });
-    res.json(user && user.posts ? user.posts : []);
+    if (!user || !user.posts) return res.json([]);
+
+    const posts = [...user.posts].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    res.json(posts);
 });
 
-// ---------- GET ALL POSTS ----------
+// --- GET ALL POSTS (newest first) ---
 app.get('/getAllPosts', async (req, res) => {
     try {
         const users = await User.find({}, { username: 1, posts: 1, _id: 0 });
@@ -374,20 +375,18 @@ app.get('/getAllPosts', async (req, res) => {
     }
 });
 
-/* ------------------------------------------------------------------
-   STATIC FILES & ROOT ROUTE
--------------------------------------------------------------------*/
+// ===== STATIC FILES & ROOT ROUTE =====
 app.use(express.static(path.join(__dirname, '../frontend')));
+
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
+
 app.use((req, res) => {
     res.status(404).sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
-/* ------------------------------------------------------------------
-   START SERVER
--------------------------------------------------------------------*/
+// ===== START SERVER =====
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });

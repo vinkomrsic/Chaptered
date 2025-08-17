@@ -3,13 +3,19 @@
   "version": "1.0.0",
   "description": "Book tracking platform with Express and MongoDB",
   "main": "server.js",
-  "type": "commonjs",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
     "express": "^5.1.0",
     "mongoose": "^8.17.0",
-    "body-parser": "^2.2.0"
+    "body-parser": "^2.2.0",
+    "node-fetch": "^3.3.2"
+  },
+  "author": "Vinko Mrsic",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vinkomrsic/Chaptered"
   }
 }

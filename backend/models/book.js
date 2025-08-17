@@ -7,7 +7,7 @@ const MoodEntrySchema = new mongoose.Schema({
 
 const BookSchema = new mongoose.Schema({
     user: { type: String, index: true },          // username
-    id: { type: String, index: true },            // Google Books volume ID
+    id: { type: String, index: true },            // Google Books ID
     title: String,
     author: String,
     thumbnail: String,
