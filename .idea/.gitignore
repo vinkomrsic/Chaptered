@@ -1,9 +1,34 @@
-# Default ignored files
-/shelf/
+# -------------------------------
+# IDE / Editor
+# -------------------------------
+.idea/
+*.iml
 /workspace.xml
-# Editor-based HTTP Client requests
+
+# HTTP requests from IDE
 /httpRequests/
-# Datasource local storage ignored files
+
+# Datasource local storage
 /dataSources/
 /dataSources.local.xml
+
+# -------------------------------
+# Node.js
+# -------------------------------
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# -------------------------------
+# Environment
+# -------------------------------
+.env
+.env.local
+.env.*.local
+
+# -------------------------------
+# OS-specific
+# -------------------------------
+.DS_Store
+Thumbs.db
