@@ -145,6 +145,13 @@ function averageMood(user, days = 30) {
 // --- SIGNUP ---
 app.post('/signup', async (req, res) => {
     const { username, password, email, name, bio } = req.body;
+
+    // Validate username (only letters, numbers, underscore, dot; 3–20 chars)
+    const usernameRegex = /^[a-zA-Z0-9_.]{3,20}$/;
+    if (!usernameRegex.test(username)) {
+        return res.status(400).json({ error: 'Invalid username. Use only letters, numbers, underscores, or dots (3–20 chars).' });
+    }
+
     const existingUser = await User.findOne({ username });
     if (existingUser) return res.status(400).json({ error: 'Username already taken' });
 
