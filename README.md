@@ -1,33 +1,28 @@
-# Chaptered — A Modern Book Tracking Platform
+# Chaptered — A Book Tracking Platform
 
-Chaptered is a web application that makes reading more personal, social, and fun.
-It blends book logging, progress tracking, mood journaling, and community posts
+Chaptered is a website that makes reading more personal, social, and fun.  
+It blends book logging, progress tracking, mood journaling, and community posts  
 into one clean experience.
 
 ──────────────────────────────────────────────────────────────────────────────
 
 ## Getting Started (Local)
 
-1) Clone the repo "https://github.com/vinkomrsic/Chaptered"
-
-2) Configure environment
-   • If you’re using the provided connection string, you can skip this.
-   • Otherwise create backend/.env with:
-   MONGO_URI=<your-mongodb-uri>
-   PORT=3000
-
-3) Install dependencies (from the project root)
-   $ npm install
-
-4) Start the server
-   $ node backend/server.js
-   (or set "start": "node backend/server.js" and run: npm start)
-
-5) Open the app
+1. Unzip the project archive into a folder of your choice.
+2. Install dependencies (from the project root, where package.json is located):
+   npm install
+3. Configure environment:
+   - A default MongoDB connection string is included in backend/.env.
+   - If you want to use your own, create/modify backend/.env with:
+     MONGO_URI=<your-mongodb-uri>
+     PORT=3000
+4. Start the server:
+   - In WebStorm (or terminal)
+   - This starts backend/server.js on port 3000.
+5. Open the app in your browser:
    http://localhost:3000
 
-Default login flow is simple: after signup, your username is stored client-side
-(localStorage) and used for calls. No session yet in the MVP.
+Developed and tested on macOS with WebStorm.
 
 ──────────────────────────────────────────────────────────────────────────────
 
@@ -55,27 +50,26 @@ External API: Google Books API
 ## Backend API Endpoints (Node/Express)
 
 ### AUTH & PROFILE
-• POST   /signup
-• POST   /login
+• POST   /signup  
+• POST   /login  
 • GET    /getProfile/:username
 
 ### BOOKS
-• POST   /saveBook
-• POST   /removeBook
-• GET    /getUserBooks/:username
+• POST   /saveBook  
+• POST   /removeBook  
+• GET    /getUserBooks/:username  
 • POST   /books/:id/mood
 
 ### MOOD (profile-level)
 • POST   /profile/mood
 
 ### STATS
-• GET    /stats/:username
-Returns: booksThisYear, moodTracker, currentMood,
-avgMood30dScore, avgMood30dLabel, avgMood30dCount
+• GET    /stats/:username  
+Returns: booksThisYear, moodTracker, currentMood, avgMood30dScore, avgMood30dLabel, avgMood30dCount
 
 ### POSTS (Explore)
-• POST   /addPost
-• GET    /getPosts/:username          (newest first)
+• POST   /addPost  
+• GET    /getPosts/:username          (newest first)  
 • GET    /getAllPosts                 (newest first, across all users)
 
 ──────────────────────────────────────────────────────────────────────────────
@@ -91,20 +85,19 @@ Delete: removeBook
 
 ## How Stats Work
 
-• Books This Year
+• Books This Year  
 Count of user.books where progress = "read" and finishedAt falls in current year.
 
-• Mood Tracker (label)
+• Mood Tracker (label)  
 Most frequent mood value in the last 30 days; falls back to the most recent mood.
 
-• Average Mood (30d)
-Each mood maps to a score (Great=5, Good=4, Average=3, Low=2, Bad=1).
-Collect events in last 30 days (profile-level and per-book history), average scores,
-then convert the numeric average to a label.
+• Average Mood (30d)  
+Each mood maps to a score (Great=5, Good=4, Average=3, Low=2, Bad=1).  
+Collect events in last 30 days (profile-level and per-book history), average scores, then convert the numeric average to a label.
 
 ──────────────────────────────────────────────────────────────────────────────
 
-## 🗺Sitemap
+## Sitemap
 
 /                  → Login  
 /dashboard.html    → Dashboard + quick stats  
@@ -116,11 +109,12 @@ then convert the numeric average to a label.
 ──────────────────────────────────────────────────────────────────────────────
 
 ## Outlook
-• Likes/comments, recommendations, charts, uploads, better error handling
+
+• Likes/comments, recommendations, charts, Local photo uploads, better error handling (Spotify/ Youtube links)
 
 ──────────────────────────────────────────────────────────────────────────────
 
-## Requirements Checklist 
+## Requirements Checklist
 
 • Multi-user with Node backend + database                  → YES  
 • ≥ 3 backend APIs + ≥ 2 DB operations                     → YES  
@@ -130,35 +124,35 @@ then convert the numeric average to a label.
 
 ## Quick Test Script (manual)
 
-1) Start server and open the app.
-2) Sign up a new user, log in.
-3) Search a book using the search bar; open a result; click Save.
-4) In book page: set progress to "read" or "reading"; toggle Favourite; pick a mood.
-5) Go to Dashboard: verify “Books This Year” and mood stats update.
-6) Go to Explore: create a post (optionally link a saved book), verify it appears.
-7) Switch tabs to “My Posts” and back to “Global”.
-8) Remove a book from Library and confirm it disappears.
+1. Start server and open the app.
+2. Sign up a new user, log in.
+3. Search a book using the search bar; open a result; click Save.
+4. In book page: set progress to "read" or "reading"; toggle Favourite; pick a mood.
+5. Go to Dashboard: verify “Books This Year” and mood stats update.
+6. Go to Explore: create a post (optionally link a saved book), verify it appears.
+7. Switch tabs to “My Posts” and back to “Global”.
+8. Remove a book from Library and confirm it disappears.
 
 ──────────────────────────────────────────────────────────────────────────────
 
 ## Troubleshooting
 
-• Page shows placeholders for stats:
+• Page shows placeholders for stats:  
 – Ensure you’re logged in (username stored in localStorage)
 
-• Mongo connection error:
-– Verify MONGO_URI in backend/.env or server.js
+• Mongo connection error:  
+– Verify MONGO_URI in backend/.env or server.js  
 – Whitelist your IP in MongoDB Atlas
 
-• CORS or 404 for static files:
+• CORS or 404 for static files:  
 – App serves /frontend as static; ensure paths match
 
 ──────────────────────────────────────────────────────────────────────────────
 
 ## Notes on Security (MVP scope)
 
-• Passwords are stored plaintext in MVP — do not deploy as-is.
-• For production: hash passwords (bcrypt), add sessions, input validation.
+• Passwords are stored plaintext in MVP — do not deploy as-is.  
+• In future: hash passwords (bcrypt), add sessions, input validation.
 
 ──────────────────────────────────────────────────────────────────────────────
 
@@ -170,4 +164,11 @@ MIT License — free to use, copy, modify, and distribute
 
 ## Credits
 
-• Vinko Mrsic — Design & Development
+• Vinko Mrsic — Design & Development  
+• Documentation, design ideas and tutorials from:  
+– MDN Web Docs (HTML, CSS, JS references)  
+– W3Schools (HTML, CSS, JS tutorials)  
+– Express.js official documentation  
+– Mongoose documentation  
+• Google Books API (book search and data import)  
+• ChatGPT: used for assistance and for generating draft documentation (this README, debugging help)  
